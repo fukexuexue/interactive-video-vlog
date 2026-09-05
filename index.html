@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Introvert Diaries — Interactive Vlog</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0f17;
+      color: #e8e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 14px 32px;
+      border-bottom: 1px solid #1e1e30;
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+    header h1 { font-size: 0.9rem; font-weight: 500; color: #555; }
+    header h2 { font-size: 1.15rem; font-weight: 600; }
+
+    .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+    /* ══ LEFT: Clock ══ */
+    .clock-panel {
+      width: 370px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 14px;
+      border-right: 1px solid #1e1e30;
+      gap: 12px;
+    }
+    .panel-label { font-size: 0.62rem; letter-spacing: 2.5px; text-transform: uppercase; color: #444; }
+
+    #clock-svg { display: block; cursor: grab; user-select: none; }
+    #clock-svg:active { cursor: grabbing; }
+
+    .clock-hint { font-size: 0.66rem; color: #333; text-align: center; line-height: 1.6; }
+
+    #related-info {
+      width: 100%;
+      padding: 8px 12px;
+      background: #13131f;
+      border-radius: 8px;
+      border: 1px solid #1e1e30;
+      font-size: 0.7rem;
+      color: #666;
+      line-height: 1.6;
+      opacity: 0;
+      transition: opacity 0.35s;
+      min-height: 48px;
+    }
+    #related-info.visible { opacity: 1; }
+    #related-info .ri-label { color: #444; font-size: 0.65rem; letter-spacing: 0.5px; }
+    #related-info .ri-segments { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .ri-seg {
+      padding: 2px 9px; border-radius: 20px; font-size: 0.68rem;
+      border: 1px solid; cursor: pointer; transition: opacity 0.2s;
+    }
+    .ri-seg:hover { opacity: 0.7; }
+
+    /* ══ RIGHT ══ */
+    .right-panel {
+      flex: 1; display: flex; flex-direction: column;
+      padding: 16px 24px 12px; gap: 10px; min-width: 0; overflow: hidden;
+    }
+    .activity-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #4ade80; animation: blink 1.8s ease-in-out infinite; flex-shrink: 0;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    .activity-dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2a40; flex-shrink: 0; transition: background 0.3s; }
+    .activity-text { display: flex; gap: 8px; align-items: baseline; }
+    .activity-time { font-size: 0.7rem; color: #555; }
+    .activity-name { font-size: 1.05rem; font-weight: 600; }
+
+    .video-wrapper {
+      position: relative; flex: 1; min-height: 0;
+      border-radius: 10px; overflow: hidden; background: #080810;
+    }
+    #video-player { width: 100%; height: 100%; object-fit: contain; display: block; outline: none; }
+    #idle-overlay {
+      position: absolute; inset: 0; display: flex; align-items: center;
+      justify-content: center; color: #2a2a40; font-size: 0.85rem; pointer-events: none;
+    }
+    #video-click-hint {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(15,15,23,0.8); border: 1px solid #252535;
+      color: #666; font-size: 0.65rem; padding: 4px 10px;
+      border-radius: 20px; pointer-events: none; opacity: 0;
+      transition: opacity 0.3s; letter-spacing: 0.5px;
+    }
+    .video-wrapper:hover #video-click-hint { opacity: 1; }
+
+    #entity-strip {
+      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; min-height: 34px; padding: 0 2px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    #entity-strip.visible { opacity: 1; pointer-events: auto; }
+    .strip-label { font-size: 0.64rem; color: #3a3a55; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+
+    .ent-chip {
+      display: inline-flex; align-items: center; padding: 2px 9px;
+      border-radius: 20px; font-size: 0.7rem; font-weight: 500;
+      cursor: pointer; border: 1px solid; white-space: nowrap;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .ent-chip:hover { opacity: 0.7; transform: translateY(-1px); }
+    .ent-chip.active-entity { outline: 2px solid rgba(255,255,255,0.45); }
+
+    .script-panel {
+      flex-shrink: 0; height: 168px; border: 1px solid #1e1e30;
+      border-radius: 10px; overflow: hidden; display: flex;
+      flex-direction: column; background: #0b0b14;
+    }
+    .script-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 14px; border-bottom: 1px solid #1e1e30; flex-shrink: 0;
+    }
+    .script-header span:first-child { font-size: 0.7rem; color: #555; letter-spacing: 0.5px; }
+    .script-sub { font-size: 0.63rem; color: #2e2e45; }
+    #transcript {
+      overflow-y: auto; padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 8px; flex: 1;
+    }
+    #transcript::-webkit-scrollbar { width: 3px; }
+    #transcript::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 3px; }
+    .t-line { font-size: 0.76rem; color: #666; line-height: 1.65; }
+    .t-line .ent-chip { font-size: 0.68rem; padding: 1px 7px; vertical-align: middle; }
+    .t-idle { font-size: 0.72rem; color: #222; padding: 16px 0; text-align: center; }
+
+    #tooltip {
+      position: fixed; background: rgba(8,8,18,0.96); border: 1px solid #252535;
+      color: #ccc; padding: 5px 11px; border-radius: 8px; font-size: 0.72rem;
+      pointer-events: none; display: none; z-index: 999; white-space: nowrap;
+    }
+
+    /* SVG animations */
+    @keyframes ring-pulse { 0%,100%{opacity:.15} 50%{opacity:.9} }
+    .seg-ring { animation: ring-pulse 1.4s ease-in-out infinite; }
+    @keyframes hand-appear { from{opacity:0} to{opacity:1} }
+
+    /* ══ HOTSPOT SYSTEM ══ */
+    #hotspot-layer {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 10;
+    }
+
+    .hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      pointer-events: auto; cursor: pointer; user-select: none;
+      transition: opacity 0.5s;
+    }
+
+    .hotspot-icon {
+      filter: drop-shadow(0 0 10px rgba(243,114,44,0.7));
+      animation: hs-float 2.2s ease-in-out infinite;
+      transition: filter 0.2s;
+    }
+    @keyframes hs-float {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+    /* bounce on single click */
+    .hotspot.bounce .hotspot-icon {
+      animation: hs-bounce 0.35s ease;
+    }
+    @keyframes hs-bounce {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.22); }
+      70%  { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    /* Each SVG part can animate independently */
+    .hs-part {
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .hotspot-badge {
+      background: rgba(10,10,22,0.88);
+      border: 1px solid rgba(243,114,44,0.55);
+      color: #f3722c; font-size: 0.62rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+      letter-spacing: 0.4px; transition: opacity 0.3s;
+    }
+
+    /* Flash overlay when hotspot triggers */
+    #connect-flash {
+      position: absolute; inset: 0; pointer-events: none; z-index: 30;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 10px; opacity: 0;
+      background: radial-gradient(circle, rgba(243,114,44,0.18) 0%, transparent 70%);
+      transition: opacity 0.2s;
+    }
+    #connect-flash.show { opacity: 1; }
+    #connect-flash .flash-label {
+      color: #f3722c; font-size: 0.8rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      background: rgba(10,10,22,0.85);
+      border: 1px solid rgba(243,114,44,0.4);
+      padding: 8px 20px; border-radius: 30px;
+    }
+
+    /* Extended-content back button */
+    #back-btn {
+      position: absolute; bottom: 52px; left: 12px;
+      background: rgba(10,10,22,0.85); border: 1px solid #252535;
+      color: #888; font-size: 0.65rem; padding: 4px 10px;
+      border-radius: 20px; cursor: pointer; pointer-events: auto;
+      display: none; z-index: 20; transition: color 0.2s;
+    }
+    #back-btn:hover { color: #e8e8f0; }
+    #back-btn.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Introvert Diaries ☀️</h1>
+  <h2>5AM Productive Day in My Life</h2>
+</header>
+
+<div class="main">
+
+  <div class="clock-panel">
+    <div class="panel-label">Your day, your way</div>
+
+    <svg id="clock-svg" width="308" height="308" viewBox="-154 -154 308 308">
+      <defs>
+        <!-- Glow filter for active segment -->
+        <filter id="seg-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Soft glow for connection lines -->
+        <filter id="line-glow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+    </svg>
+
+    <div class="clock-hint">
+      Drag the clock to seek · click entities to connect
+    </div>
+    <div id="related-info">
+      <div class="ri-label"></div>
+      <div class="ri-segments"></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="activity-row">
+      <div class="live-dot"></div>
+      <div class="activity-dot" id="activity-dot"></div>
+      <div class="activity-text">
+        <div class="activity-time" id="activity-time">Select a segment on the clock</div>
+        <div class="activity-name" id="activity-name">—</div>
+      </div>
+    </div>
+
+    <div class="video-wrapper" id="video-wrapper">
+      <video id="video-player" controls></video>
+      <div id="idle-overlay">← Drag or click the clock to begin</div>
+      <div id="video-click-hint">🔍 Click to detect elements</div>
+      <!-- Hotspot layer: SVG overlays appear here at keyframes -->
+      <div id="hotspot-layer"></div>
+      <!-- Flash when hotspot triggers navigation -->
+      <div id="connect-flash"><div class="flash-label"></div></div>
+      <!-- Back to clip button (shown after extended video) -->
+      <button id="back-btn">← Back to clip</button>
+    </div>
+
+    <div id="entity-strip">
+      <span class="strip-label">In this moment:</span>
+      <div id="strip-chips"></div>
+    </div>
+
+    <div class="script-panel">
+      <div class="script-header">
+        <span>📜 Script</span>
+        <span class="script-sub">click highlighted entities → find connections on clock ↑</span>
+      </div>
+      <div id="transcript"><div class="t-idle">Select a clip to see its script</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const SEGMENTS = [
+  { id:'morning', emoji:'☀️', name:'Morning Prep',       time:'5:00 AM',  color:'#f9c74f', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Morning_Preparation.mp4',                   start:-90,  end:-45  },
+  { id:'pilates', emoji:'🧘', name:'Pilates Class',       time:'6:30 AM',  color:'#f94144', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Practice_Pilates.mp4',                       start:-45,  end:0    },
+  { id:'matcha',  emoji:'🍵', name:'Matcha Ritual',       time:'8:00 AM',  color:'#43aa8b', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Morning_Matcha%20_Ritual.mp4',                 start:0,    end:45   },
+  { id:'tidy',    emoji:'🏠', name:'Tidy Room',           time:'8:30 AM',  color:'#577590', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Tidy_Room.mp4',                               start:45,   end:90   },
+  { id:'journal', emoji:'📓', name:'Journal & GoodNotes', time:'9:00 AM',  color:'#4d9de0', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Mindfulness_Routine_GoodNotes%20Features.mp4', start:90,   end:135  },
+  { id:'work',    emoji:'💻', name:'Daily Work',          time:'10:00 AM', color:'#9b5de5', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Daily_Work.mp4',                              start:135,  end:180  },
+  { id:'grocery', emoji:'🛒', name:'Grocery Haul',        time:'5:00 PM',  color:'#f3722c', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Grocery_Shopping%20Haul.mp4',                   start:180,  end:225  },
+  { id:'cooking', emoji:'🍳', name:'Cook Shakshuka',      time:'7:00 PM',  color:'#e63946', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Cooking_Shakshuka.mp4',                       start:225,  end:270  },
+];
+
+const ENTITIES = {
+  pilates:   { label:'Pilates 🧘',       color:'#f94144' },
+  workout:   { label:'Workout 💪',       color:'#f94144' },
+  matcha:    { label:'Matcha 🍵',        color:'#43aa8b' },
+  france:    { label:'France 🇫🇷',      color:'#4d9de0' },
+  london:    { label:'London',           color:'#4d9de0' },
+  goodnotes: { label:'GoodNotes 📓',     color:'#9b5de5' },
+  shakshuka: { label:'Shakshuka 🍳',     color:'#f3722c' },
+  eggs:      { label:'Eggs 🥚',          color:'#f9c74f' },
+  skincare:  { label:'Skincare',         color:'#c77dff' },
+  ginger:    { label:'Ginger Shot 🫚',   color:'#90be6d' },
+  book:      { label:'The Housemaid 📚', color:'#457b9d' },
+  tidy:      { label:'Tidy Up 🏠',       color:'#577590' },
+};
+
+const ENTITY_LINKS = {
+  pilates:   ['morning','pilates','matcha'],
+  workout:   ['morning','pilates','matcha'],
+  matcha:    ['morning','matcha'],
+  france:    ['matcha','journal','work'],
+  london:    ['journal','work'],
+  goodnotes: ['journal','work'],
+  shakshuka: ['grocery','cooking'],
+  eggs:      ['grocery','cooking'],
+  skincare:  ['morning'],
+  ginger:    ['morning'],
+  book:      ['cooking'],
+  tidy:      ['matcha','tidy'],
+};
+
+const CLIP_TIMELINE = {
+  morning: [ {from:0,  to:45,  entities:['skincare']}, {from:45, to:999, entities:['ginger','pilates','workout']} ],
+  pilates: [ {from:0,  to:999, entities:['pilates','workout']} ],
+  matcha:  [ {from:0,  to:55,  entities:['matcha','france']}, {from:55, to:110, entities:['matcha','workout']}, {from:110,to:999,entities:['tidy']} ],
+  tidy:    [ {from:0,  to:999, entities:['tidy']} ],
+  journal: [ {from:0,  to:65,  entities:['france','goodnotes']}, {from:65, to:999, entities:['goodnotes','london']} ],
+  work:    [ {from:0,  to:999, entities:['france','goodnotes']} ],
+  grocery: [ {from:0,  to:60,  entities:['shakshuka']}, {from:60, to:120, entities:['eggs','shakshuka']}, {from:120,to:999,entities:['eggs']} ],
+  cooking: [ {from:0,  to:55,  entities:['shakshuka']}, {from:55, to:105, entities:['eggs','shakshuka']}, {from:105,to:999,entities:['shakshuka','book']} ],
+};
+
+const TRANSCRIPTS = {
+  morning: [
+    { text:"I'm trying to use my jet lag for good — I booked a {pilates} class for 6:30 and I really want to eat before that." },
+    { text:"I really like this glazing milk — no fragrance. I'm experiencing some {skincare} issues after returning from my trip." },
+    { text:"I was going to make {matcha} but I'll just have this {ginger} shot — quick wake-up before my {workout} class." },
+  ],
+  pilates: [
+    { text:"6:30 AM {pilates} class — using jet lag to force myself into a morning routine." },
+    { text:"That {workout} absolutely destroyed my legs. Not even funny." },
+  ],
+  matcha: [
+    { text:"I just got a refill of my favorite {matcha} from Apoto Tea — I got this in {france}. Absolutely insane." },
+    { text:"My legs are so dead after that {workout}. But look at this {matcha} microfoam — beautiful!" },
+    { text:"I'm going to stay in my workout clothes and {tidy} my apartment because it is a wreck right now." },
+  ],
+  tidy: [
+    { text:"Quick {tidy} of the apartment before my mindfulness hour — been neglecting this for weeks." },
+    { text:"Getting everything clean and organized after a very full morning." },
+  ],
+  journal: [
+    { text:"I want to take some solo time to reflect with {goodnotes} — going through my favorite memories from {france}." },
+    { text:"Huge shoutout to {goodnotes} for sponsoring — I was invited to {london} for their launch event." },
+    { text:"The new {goodnotes} whiteboard has an infinite canvas — perfect for mind mapping." },
+  ],
+  work: [
+    { text:"First day back at the internship after {london} and then {france}. Really ambitious of me." },
+    { text:"I use {goodnotes} for pharmacy school and at my internship — it is so versatile." },
+  ],
+  grocery: [
+    { text:"I've been craving {shakshuka} for 3 weeks — ended up going to two stores to find whole canned tomatoes." },
+    { text:"Picked up {eggs}, onions, garlic, naan, parsley — everything for {shakshuka} tonight." },
+    { text:"Entire haul including tax — $90 Canadian. Mostly produce." },
+  ],
+  cooking: [
+    { text:"Oh my god — the canned tomatoes ARE peeled! Perfect {shakshuka} moment." },
+    { text:"Going to do four {eggs} but I'll save some of this {shakshuka} for tomorrow." },
+    { text:"Literally my dream night — {shakshuka} and a new episode... going to do my {book} review after!" },
+  ],
+};
+
+/* ════════════════════════════════════════
+   SVG HELPERS
+════════════════════════════════════════ */
+const svg = document.getElementById('clock-svg');
+const ns  = 'http://www.w3.org/2000/svg';
+
+function S(tag, attrs = {}) {
+  const e = document.createElementNS(ns, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+
+const OR = 132, IR = 64, LR = 96;  // outer / inner / label radius
+
+function xy(deg, r) {
+  const a = deg * Math.PI / 180;
+  return { x: r * Math.cos(a), y: r * Math.sin(a) };
+}
+
+function arc(a1, a2, ro, ri, gap = 2.2) {
+  const [s, e] = [a1 + gap, a2 - gap];
+  const p1 = xy(s,ro), p2 = xy(e,ro), p3 = xy(e,ri), p4 = xy(s,ri);
+  const lg = (e - s > 180) ? 1 : 0;
+  return `M${f(p1.x)} ${f(p1.y)} A${ro} ${ro} 0 ${lg} 1 ${f(p2.x)} ${f(p2.y)} L${f(p3.x)} ${f(p3.y)} A${ri} ${ri} 0 ${lg} 0 ${f(p4.x)} ${f(p4.y)}Z`;
+}
+
+const f = n => n.toFixed(2);
+
+/* ════════════════════════════════════════
+   BUILD CLOCK
+════════════════════════════════════════ */
+
+// Background plate
+svg.appendChild(S('circle', { cx:0,cy:0,r:OR+16,fill:'#10101c',stroke:'#1e1e30','stroke-width':'1' }));
+svg.appendChild(S('circle', { cx:0,cy:0,r:IR-4, fill:'#0a0a14' }));
+
+// Connection lines group (behind segments)
+const connG = S('g', { id:'connections' });
+svg.appendChild(connG);
+
+// Active glow rings + segments
+let activeSegId = null;
+
+SEGMENTS.forEach(seg => {
+  const mid = (seg.start + seg.end) / 2;
+
+  // Outer related-state ring
+  const ring = S('path', {
+    d: arc(seg.start, seg.end, OR + 12, OR + 4),
+    fill: 'none', stroke: seg.color,
+    'stroke-width': '5', opacity: '0',
+  });
+  svg.appendChild(ring);
+  seg._ring = ring;
+
+  // Accent ring (active state)
+  const accent = S('path', {
+    d: arc(seg.start, seg.end, OR + 5, OR + 1, 2.4),
+    fill: seg.color, opacity: '0',
+    filter: 'url(#seg-glow)',
+    style: 'pointer-events:none',
+  });
+  svg.appendChild(accent);
+  seg._accent = accent;
+
+  // Main segment
+  const g = S('g');
+  g.style.cursor = 'pointer';
+
+  const path = S('path', {
+    d: arc(seg.start, seg.end, OR, IR),
+    fill: seg.color, opacity: '0.45',
+  });
+  path.style.transition = 'opacity 0.2s';
+
+  // Emoji
+  const lp = xy(mid, LR);
+  const txt = S('text', {
+    x: f(lp.x), y: f(lp.y),
+    'text-anchor': 'middle', 'dominant-baseline': 'middle',
+    'font-size': '18',
+    style: 'pointer-events:none;user-select:none',
+  });
+  txt.textContent = seg.emoji;
+
+  g.appendChild(path);
+  g.appendChild(txt);
+  svg.appendChild(g);
+
+  // Hover
+  g.addEventListener('mouseenter', ev => {
+    if (seg.id !== activeSegId) path.setAttribute('opacity', '0.75');
+    showTip(`${seg.emoji}  ${seg.name}  ·  ${seg.time}`, ev);
+  });
+  g.addEventListener('mousemove', ev => moveTip(ev));
+  g.addEventListener('mouseleave', () => {
+    if (seg.id !== activeSegId) path.setAttribute('opacity', '0.45');
+    hideTip();
+  });
+  g.addEventListener('click', () => {
+    if (!isDragging) playSegment(seg);
+  });
+
+  seg._path = path;
+  seg._g    = g;
+});
+
+// Progress arc (fills as video plays) — drawn above segments
+const progressArc = S('path', {
+  fill: 'none', stroke: '#fff',
+  'stroke-width': '3', 'stroke-linecap': 'round',
+  opacity: '0', style: 'pointer-events:none',
+});
+svg.appendChild(progressArc);
+
+// Clock hand
+const handLine = S('line', {
+  x1:'0', y1:'8', x2:'0', y2:`-${IR - 10}`,
+  stroke:'#e8e8f0', 'stroke-width':'2', 'stroke-linecap':'round',
+  opacity:'0', style:'pointer-events:none; transition:opacity 0.4s',
+});
+const handPivot = S('circle', { cx:'0',cy:'0',r:'5', fill:'#e8e8f0', opacity:'0', style:'pointer-events:none; transition:opacity 0.4s' });
+const handTip   = S('circle', { cx:'0',cy:`-${IR-10}`, r:'3', fill:'#e8e8f0', opacity:'0', style:'pointer-events:none; transition:opacity 0.4s' });
+svg.appendChild(handLine);
+svg.appendChild(handPivot);
+svg.appendChild(handTip);
+
+// Center text
+const centerTime = S('text', {
+  x:'0', y:'-6', 'text-anchor':'middle', 'dominant-baseline':'middle',
+  'font-size':'12', 'font-weight':'600', fill:'#ccc',
+  style:'pointer-events:none;user-select:none;transition:opacity 0.3s', opacity:'0',
+});
+const centerName = S('text', {
+  x:'0', y:'9', 'text-anchor':'middle', 'dominant-baseline':'middle',
+  'font-size':'7', 'letter-spacing':'1.5', fill:'#444',
+  style:'pointer-events:none;user-select:none;text-transform:uppercase', opacity:'0',
+});
+svg.appendChild(centerTime);
+svg.appendChild(centerName);
+
+/* ════════════════════════════════════════
+   CLOCK HAND — rotate helper
+════════════════════════════════════════ */
+function setHandAngle(deg) {
+  const t = `rotate(${deg})`;
+  handLine.setAttribute('transform', t);
+  handTip.setAttribute('transform', t);
+}
+
+function showHand(seg) {
+  handLine.setAttribute('opacity','0.9');
+  handPivot.setAttribute('opacity','0.9');
+  handTip.setAttribute('opacity','0.9');
+  setHandAngle((seg.start + seg.end) / 2);
+}
+
+/* ════════════════════════════════════════
+   PROGRESS ARC
+════════════════════════════════════════ */
+function updateProgressArc(seg, progress) {
+  if (progress <= 0.01) { progressArc.setAttribute('opacity','0'); return; }
+  const r   = OR + 9;
+  const sA  = seg.start + 2.5;
+  const eA  = sA + Math.max(0, progress * (seg.end - seg.start - 5));
+  const p1  = xy(sA, r), p2 = xy(eA, r);
+  const lg  = (eA - sA > 180) ? 1 : 0;
+  progressArc.setAttribute('d', `M${f(p1.x)} ${f(p1.y)} A${r} ${r} 0 ${lg} 1 ${f(p2.x)} ${f(p2.y)}`);
+  progressArc.setAttribute('stroke', seg.color);
+  progressArc.setAttribute('opacity', '0.8');
+}
+
+/* ════════════════════════════════════════
+   RAF TRACKING LOOP
+════════════════════════════════════════ */
+let rafId = null;
+
+function startTracking(seg) {
+  cancelAnimationFrame(rafId);
+  const player = document.getElementById('video-player');
+
+  function tick() {
+    if (player.duration && !player.paused) {
+      const p   = player.currentTime / player.duration;
+      const deg = seg.start + p * (seg.end - seg.start);
+      setHandAngle(deg);
+      updateProgressArc(seg, p);
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+function stopTracking() { cancelAnimationFrame(rafId); rafId = null; }
+
+/* ════════════════════════════════════════
+   DRAG TO SEEK
+════════════════════════════════════════ */
+let isDragging = false;
+let dragMoved  = false;
+
+function mouseAngle(e) {
+  const r  = svg.getBoundingClientRect();
+  const dx = e.clientX - (r.left + r.width  / 2);
+  const dy = e.clientY - (r.top  + r.height / 2);
+  let a    = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (a < -90) a += 360;   // map (-180,-90) → (180,270)
+  return a;
+}
+
+svg.addEventListener('mousedown', () => { isDragging = true; dragMoved = false; });
+
+// mousemove and mouseup are handled in the unified hotspot section below
+
+/* ════════════════════════════════════════
+   PLAYBACK
+════════════════════════════════════════ */
+function playSegment(seg, fromDrag = false) {
+  // Reset all segment visuals
+  SEGMENTS.forEach(s => {
+    s._path.setAttribute('opacity', '0.45');
+    s._path.removeAttribute('stroke');
+    s._accent.setAttribute('opacity', '0');
+  });
+  clearRelated();
+
+  // Activate segment
+  seg._path.setAttribute('opacity', '1');
+  seg._accent.setAttribute('opacity', '0.4');
+  activeSegId = seg.id;
+
+  // Activity row
+  document.getElementById('activity-dot').style.background = seg.color;
+  document.getElementById('activity-time').textContent = seg.time;
+  document.getElementById('activity-name').textContent = `${seg.emoji}  ${seg.name}`;
+
+  // Center clock text
+  centerTime.textContent = seg.time;
+  centerTime.setAttribute('opacity', '1');
+  centerName.textContent = seg.name;
+  centerName.setAttribute('opacity', '1');
+
+  // Show hand
+  showHand(seg);
+
+  // Video
+  const player = document.getElementById('video-player');
+  document.getElementById('idle-overlay').style.display = 'none';
+  if (!fromDrag) {
+    player.src = encodeURI(seg.video);
+    player.load();
+    player.play().catch(() => {});
+  }
+
+  clearAllHotspots();
+  document.getElementById('back-btn').classList.remove('visible');
+  hideEntityStrip();
+  renderTranscript(seg.id);
+  startTracking(seg);
+  hideTip();
+}
+
+/* ════════════════════════════════════════
+   CONNECTION LINES
+════════════════════════════════════════ */
+function drawConnections(fromSeg, toSegs, entityKey) {
+  connG.innerHTML = '';
+  const color = ENTITIES[entityKey]?.color ?? '#fff';
+  const fromMid = (fromSeg.start + fromSeg.end) / 2;
+  const fp      = xy(fromMid, IR - 14);
+
+  // From-dot
+  connG.appendChild(S('circle', { cx:f(fp.x), cy:f(fp.y), r:'3', fill:color, opacity:'0.9' }));
+
+  toSegs.forEach((toSeg, i) => {
+    const toMid = (toSeg.start + toSeg.end) / 2;
+    const tp    = xy(toMid, IR - 14);
+
+    // Bezier control: pulled toward center
+    const cp = { x: (fp.x + tp.x) * 0.2, y: (fp.y + tp.y) * 0.2 };
+    const d  = `M${f(fp.x)} ${f(fp.y)} Q${f(cp.x)} ${f(cp.y)} ${f(tp.x)} ${f(tp.y)}`;
+
+    const line = S('path', {
+      d, fill:'none', stroke:color,
+      'stroke-width':'1.8', 'stroke-linecap':'round',
+      opacity:'0.75', filter:'url(#line-glow)',
+    });
+    connG.appendChild(line);
+
+    // Animate stroke-dashoffset
+    const len = line.getTotalLength();
+    line.setAttribute('stroke-dasharray', len);
+    line.setAttribute('stroke-dashoffset', len);
+    setTimeout(() => {
+      line.style.transition = `stroke-dashoffset 0.55s ease ${i * 0.12}s`;
+      line.setAttribute('stroke-dashoffset', '0');
+    }, 30);
+
+    // To-dot
+    connG.appendChild(S('circle', { cx:f(tp.x), cy:f(tp.y), r:'3', fill:color, opacity:'0.9' }));
+  });
+}
+
+function clearConnections() { connG.innerHTML = ''; }
+
+/* ════════════════════════════════════════
+   RELATED HIGHLIGHTING
+════════════════════════════════════════ */
+function highlightRelated(segIds, entityKey) {
+  clearRelated();
+  if (!segIds.length) return;
+
+  const ent  = ENTITIES[entityKey];
+  const segs = segIds.map(id => SEGMENTS.find(s => s.id === id)).filter(Boolean);
+  const from = SEGMENTS.find(s => s.id === activeSegId);
+
+  segs.forEach(s => {
+    s._ring.setAttribute('opacity', '0.7');
+    s._ring.classList.add('seg-ring');
+  });
+
+  if (from) drawConnections(from, segs, entityKey);
+
+  const ri = document.getElementById('related-info');
+  ri.querySelector('.ri-label').textContent = `${ent?.label ?? entityKey} also appears in:`;
+  ri.querySelector('.ri-segments').innerHTML = segs.map(s =>
+    `<span class="ri-seg" data-id="${s.id}" style="color:${s.color};border-color:${s.color}44;background:${s.color}12">${s.emoji} ${s.name}</span>`
+  ).join('');
+  ri.classList.add('visible');
+  ri.querySelectorAll('.ri-seg').forEach(b =>
+    b.addEventListener('click', () => { const s = SEGMENTS.find(x => x.id === b.dataset.id); if (s) playSegment(s); })
+  );
+}
+
+function clearRelated() {
+  SEGMENTS.forEach(s => { s._ring.setAttribute('opacity','0'); s._ring.classList.remove('seg-ring'); });
+  clearConnections();
+  document.getElementById('related-info').classList.remove('visible');
+}
+
+/* ════════════════════════════════════════
+   TRANSCRIPT
+════════════════════════════════════════ */
+function renderTranscript(segId) {
+  const box   = document.getElementById('transcript');
+  const lines = TRANSCRIPTS[segId];
+  if (!lines) { box.innerHTML = '<div class="t-idle">No script available</div>'; return; }
+
+  box.innerHTML = lines.map(line => {
+    const html = line.text.replace(/\{(\w+)\}/g, (_, key) => {
+      const ent = ENTITIES[key]; if (!ent) return key;
+      return `<span class="ent-chip" data-entity="${key}" style="background:${ent.color}20;color:${ent.color};border-color:${ent.color}55">${ent.label}</span>`;
+    });
+    return `<div class="t-line">${html}</div>`;
+  }).join('');
+
+  box.querySelectorAll('.ent-chip').forEach(c =>
+    c.addEventListener('click', () => activateEntity(c.dataset.entity, c))
+  );
+}
+
+function activateEntity(key, src) {
+  if (!ENTITIES[key]) return;
+  document.querySelectorAll('.ent-chip.active-entity').forEach(c => c.classList.remove('active-entity'));
+  src?.classList.add('active-entity');
+  const related = (ENTITY_LINKS[key] ?? []).filter(id => id !== activeSegId);
+  highlightRelated(related, key);
+}
+
+/* ════════════════════════════════════════
+   VIDEO CLICK → entity detection
+════════════════════════════════════════ */
+document.getElementById('video-wrapper').addEventListener('click', ev => {
+  const player = document.getElementById('video-player');
+  if (!activeSegId || player.readyState < 1) return;
+  const rect = player.getBoundingClientRect();
+  if ((ev.clientY - rect.top) / rect.height > 0.88) return;
+  const slot = (CLIP_TIMELINE[activeSegId] ?? []).find(s => player.currentTime >= s.from && player.currentTime < s.to);
+  if (slot?.entities?.length) showEntityStrip(slot.entities); else hideEntityStrip();
+});
+
+function showEntityStrip(keys) {
+  const chips = document.getElementById('strip-chips');
+  chips.innerHTML = keys.map(key => {
+    const ent = ENTITIES[key]; if (!ent) return '';
+    return `<span class="ent-chip" data-entity="${key}" style="background:${ent.color}20;color:${ent.color};border-color:${ent.color}55">${ent.label}</span>`;
+  }).join('');
+  document.getElementById('entity-strip').classList.add('visible');
+  chips.querySelectorAll('.ent-chip').forEach(c =>
+    c.addEventListener('click', () => activateEntity(c.dataset.entity, c))
+  );
+}
+function hideEntityStrip() {
+  document.getElementById('entity-strip').classList.remove('visible');
+  document.getElementById('strip-chips').innerHTML = '';
+}
+
+/* ════════════════════════════════════════
+   TOOLTIP
+════════════════════════════════════════ */
+function showTip(t, ev) { const el=document.getElementById('tooltip'); el.textContent=t; el.style.display='block'; moveTip(ev); }
+function moveTip(ev)     { const el=document.getElementById('tooltip'); el.style.left=(ev.clientX+14)+'px'; el.style.top=(ev.clientY-32)+'px'; }
+function hideTip()       { document.getElementById('tooltip').style.display='none'; }
+
+/* ════════════════════════════════════════
+   HOTSPOT DATA
+   at: timestamp (s) when SVG appears
+   hideAt: timestamp (s) when it fades
+   pos: {x,y} as % of video dimensions
+   link: video file to play on drag
+════════════════════════════════════════ */
+const HOTSPOTS = {
+  cooking: [
+    {
+      id: 'hs-shakshuka',
+      at: 11, hideAt: 28,
+      pos: { x: 82, y: 14 },          // top-right corner of the video
+      hint: 'Double-click to explore',
+      link: 'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/cook.mp4',
+      linkLabel: 'Full Shakshuka Recipe',
+      // SVG split into independently animatable parts (data-part)
+      svg: `
+        <g class="hs-part" data-part="base">
+          <ellipse cx="44" cy="62" rx="37" ry="13" fill="#3d1a08"/>
+          <ellipse cx="44" cy="58" rx="33" ry="12" fill="#c0392b"/>
+          <ellipse cx="38" cy="56" rx="10" ry="7"  fill="#e74c3c" opacity="0.55"/>
+          <ellipse cx="54" cy="57" rx="8"  ry="6"  fill="#e74c3c" opacity="0.45"/>
+        </g>
+        <g class="hs-part" data-part="egg1">
+          <ellipse cx="30" cy="53" rx="11" ry="10" fill="rgba(255,255,255,0.93)"/>
+          <circle  cx="30" cy="53" r="5.5" fill="#f9c74f"/>
+          <circle  cx="28" cy="51" r="1.8" fill="#fff" opacity="0.5"/>
+        </g>
+        <g class="hs-part" data-part="egg2">
+          <ellipse cx="56" cy="53" rx="11" ry="10" fill="rgba(255,255,255,0.93)"/>
+          <circle  cx="56" cy="53" r="5.5" fill="#f9c74f"/>
+          <circle  cx="54" cy="51" r="1.8" fill="#fff" opacity="0.5"/>
+        </g>
+        <g class="hs-part" data-part="herbs">
+          <ellipse cx="43" cy="48" rx="5" ry="2.5" fill="rgba(255,255,255,0.8)"/>
+          <circle  cx="40" cy="45" r="2.2" fill="#2a9d5c"/>
+          <circle  cx="45" cy="44" r="1.7" fill="#2a9d5c"/>
+          <circle  cx="37" cy="46" r="1.5" fill="#2a9d5c" opacity="0.75"/>
+        </g>
+        <g class="hs-part" data-part="steam">
+          <path d="M20 38 C18 32 22 27 20 20" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M44 32 C42 26 46 21 44 14" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M66 38 C64 32 68 27 66 20" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </g>
+        <g class="hs-part" data-part="handle">
+          <rect x="77" y="55" width="13" height="6" rx="3" fill="#3d1a08"/>
+        </g>
+      `
+    }
+  ]
+};
+
+/* ════════════════════════════════════════
+   HOTSPOT STATE
+════════════════════════════════════════ */
+const activeHotspots  = new Map(); // id → DOM element
+const visibleHotspots = new Set();
+let   prevSegForBack  = null;      // segment to return to after extended video
+
+/* ════════════════════════════════════════
+   HOTSPOT: CHECK ON TIMEUPDATE
+════════════════════════════════════════ */
+document.getElementById('video-player').addEventListener('timeupdate', () => {
+  if (!activeSegId) return;
+  const t = document.getElementById('video-player').currentTime;
+  (HOTSPOTS[activeSegId] ?? []).forEach(spot => {
+    const inRange = t >= spot.at && t < (spot.hideAt ?? Infinity);
+    if (inRange && !visibleHotspots.has(spot.id))  showHotspot(spot);
+    if (!inRange && visibleHotspots.has(spot.id))  removeHotspot(spot.id);
+  });
+});
+
+/* ════════════════════════════════════════
+   HOTSPOT: SHOW / REMOVE
+════════════════════════════════════════ */
+function showHotspot(spot) {
+  visibleHotspots.add(spot.id);
+
+  const el = document.createElement('div');
+  el.className = 'hotspot';
+  el.id = spot.id;
+  el.style.cssText = `left:${spot.pos.x}%;top:${spot.pos.y}%;opacity:0`;
+  el.innerHTML = `
+    <svg class="hotspot-icon" width="88" height="78" viewBox="0 0 88 78">${spot.svg}</svg>
+    <div class="hotspot-badge">🍳 ${spot.hint}</div>
+  `;
+
+  document.getElementById('hotspot-layer').appendChild(el);
+  activeHotspots.set(spot.id, el);
+
+  // Fade in
+  requestAnimationFrame(() => {
+    el.style.transition = 'opacity 0.55s';
+    el.style.opacity = '1';
+  });
+
+  // Single click → bounce feedback (shows it's interactive)
+  el.addEventListener('click', ev => {
+    ev.stopPropagation();
+    el.classList.remove('bounce');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('bounce');
+    setTimeout(() => el.classList.remove('bounce'), 380);
+  });
+
+  // Double-click → decompose + navigate
+  el.addEventListener('dblclick', ev => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    decomposeHotspot(el, spot);
+  });
+}
+
+function removeHotspot(id) {
+  visibleHotspots.delete(id);
+  const el = activeHotspots.get(id);
+  if (!el) return;
+  el.style.transition = 'opacity 0.4s';
+  el.style.opacity = '0';
+  setTimeout(() => el.remove(), 420);
+  activeHotspots.delete(id);
+}
+
+function clearAllHotspots() {
+  [...activeHotspots.keys()].forEach(removeHotspot);
+  visibleHotspots.clear();
+}
+
+/* ════════════════════════════════════════
+   DECOMPOSE: parts fly apart on dblclick
+════════════════════════════════════════ */
+function decomposeHotspot(el, spot) {
+  el.style.pointerEvents = 'none';
+
+  // Each part's explosion direction (SVG px units, relative to part center)
+  const dirs = {
+    steam:  { tx:  0,  ty: -65, r:  0,  s: 0.05, d: 0.00 },
+    herbs:  { tx:  5,  ty: -48, r: 10,  s: 0.10, d: 0.05 },
+    egg1:   { tx: -52, ty: -38, r:-28,  s: 0.12, d: 0.08 },
+    egg2:   { tx:  52, ty: -38, r: 28,  s: 0.12, d: 0.08 },
+    handle: { tx:  58, ty:  12, r: 42,  s: 0.20, d: 0.12 },
+    base:   { tx:  0,  ty:  46, r: 12,  s: 0.40, d: 0.04 },
+  };
+
+  el.querySelectorAll('.hs-part').forEach(part => {
+    const key = part.dataset.part;
+    const d   = dirs[key] ?? { tx: 0, ty: -40, r: 0, s: 0.2, d: 0 };
+
+    part.style.transition =
+      `transform 0.58s cubic-bezier(.4,0,.6,1) ${d.d}s,` +
+      `opacity   0.50s ease                    ${d.d}s`;
+
+    requestAnimationFrame(() => {
+      part.style.transform = `translate(${d.tx}px,${d.ty}px) rotate(${d.r}deg) scale(${d.s})`;
+      part.style.opacity   = '0';
+    });
+  });
+
+  // Fade badge quickly
+  el.querySelector('.hotspot-badge').style.opacity = '0';
+
+  // Trigger video after animation
+  setTimeout(() => triggerHotspotLink(spot, el), 680);
+}
+
+/* Clock drag — mousemove / mouseup */
+document.addEventListener('mousemove', ev => {
+  if (!isDragging) return;
+  const a   = mouseAngle(ev);
+  const seg = SEGMENTS.find(s => a >= s.start && a < s.end);
+  if (!seg) return;
+  dragMoved = true;
+  setHandAngle(a);
+  if (seg.id !== activeSegId) {
+    playSegment(seg, true);
+  } else {
+    const player = document.getElementById('video-player');
+    if (player.duration) {
+      const p = (a - seg.start) / (seg.end - seg.start);
+      player.currentTime = Math.max(0, Math.min(player.duration, p * player.duration));
+    }
+    updateProgressArc(seg, player.currentTime / (player.duration || 1));
+  }
+});
+
+document.addEventListener('mouseup', () => { isDragging = false; });
+
+/* ════════════════════════════════════════
+   HOTSPOT: TRIGGER LINKED VIDEO
+════════════════════════════════════════ */
+function triggerHotspotLink(spot, el) {
+  prevSegForBack = activeSegId; // remember where to go back
+
+  // Flash overlay
+  const flash = document.getElementById('connect-flash');
+  flash.querySelector('.flash-label').textContent = '↗  Extended content loading…';
+  flash.classList.add('show');
+
+  // Fade out hotspot
+  el.style.transition = 'opacity 0.3s, transform 0.3s';
+  el.style.opacity = '0';
+  el.style.transform = 'translate(-50%,-50%) scale(0.5)';
+
+  setTimeout(() => {
+    flash.classList.remove('show');
+
+    // Load extended video
+    const player = document.getElementById('video-player');
+    player.src = encodeURI(spot.link);
+    player.load();
+    player.play().catch(() => {});
+
+    // Update info bar
+    document.getElementById('activity-time').textContent = 'Extended Content';
+    document.getElementById('activity-name').textContent = `🍳  ${spot.linkLabel}`;
+    document.getElementById('activity-dot').style.background = '#f3722c';
+
+    // Show back button
+    const btn = document.getElementById('back-btn');
+    btn.classList.add('visible');
+    btn.onclick = () => {
+      const seg = SEGMENTS.find(s => s.id === prevSegForBack);
+      if (seg) playSegment(seg);
+      btn.classList.remove('visible');
+    };
+
+    el.remove();
+    activeHotspots.delete(spot.id);
+    visibleHotspots.delete(spot.id);
+  }, 520);
+}
+</script>
+</body>
+</html>
