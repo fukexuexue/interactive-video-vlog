@@ -27,6 +27,47 @@
     header h1 { font-size: 0.9rem; font-weight: 500; color: #555; }
     header h2 { font-size: 1.15rem; font-weight: 600; }
 
+    /* Interaction guide */
+    .help { margin-left: auto; position: relative; }
+    .help summary {
+      cursor: pointer; list-style: none; font-size: 0.75rem;
+      padding: 5px 11px; border: 1px solid #333; border-radius: 4px;
+      color: #b8b8c8; user-select: none; transition: background 0.15s;
+    }
+    .help summary::-webkit-details-marker { display: none; }
+    .help summary::marker { content: ''; }
+    .help summary:hover { background: #1a1a24; color: #e8e8f0; }
+    .help[open] summary { background: #1e1e30; color: #e8e8f0; border-color: #444; }
+    .help-content {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: #16161f; border: 1px solid #333; border-radius: 6px;
+      padding: 14px 18px; width: 360px; z-index: 200;
+      font-size: 0.78rem; line-height: 1.6; color: #d0d0dc;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+    .help-content h3 {
+      font-size: 0.72rem; font-weight: 600; color: #f9c74f;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .help-content ul { padding-left: 18px; margin: 0; }
+    .help-content li { margin: 5px 0; }
+    .help-content li b { color: #f9c74f; font-weight: 600; }
+    .help-content li i { color: #8e8eaa; font-style: normal; font-size: 0.72rem; }
+
+    /* Pulse hints on interactive elements when help panel is open */
+    @keyframes hint-pulse {
+      0%, 100% { filter: drop-shadow(0 0 0 rgba(249,199,79,0)); }
+      50%      { filter: drop-shadow(0 0 12px rgba(249,199,79,0.85)); }
+    }
+    @keyframes hint-outline {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(249,199,79,0); }
+      50%      { box-shadow: 0 0 0 3px rgba(249,199,79,0.55); }
+    }
+    body.show-hints #clock-svg,
+    body.show-hints .hotspot { animation: hint-pulse 1.6s ease-in-out infinite; }
+    body.show-hints .ent-chip,
+    body.show-hints #video-wrapper { animation: hint-outline 1.6s ease-in-out infinite; }
+
     .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
     /* ══ LEFT: Clock ══ */
@@ -235,7 +276,26 @@
 <header>
   <h1>Introvert Diaries ☀️</h1>
   <h2>5AM Productive Day in My Life</h2>
+  <details class="help" id="help-panel">
+    <summary>💡 How to interact</summary>
+    <div class="help-content">
+      <h3>Ways to explore</h3>
+      <ul>
+        <li><b>Drag or click the clock</b> — seek across the day (5AM → 7PM)</li>
+        <li><b>Click a chapter arc</b> — jump to that activity (Morning Prep, Pilates, Matcha, Cook…)</li>
+        <li><b>Click the video</b> — reveal hotspots on objects in the frame</li>
+        <li><b>Double-click a hotspot</b> — dive into a related sub-clip (e.g. shakshuka → full cook)</li>
+        <li><b>Click a chip in "In this moment" or the script</b> — highlight where that entity appears on the clock</li>
+      </ul>
+      <i>Tip: open this panel to see all interactive spots pulse ✨</i>
+    </div>
+  </details>
 </header>
+<script>
+  document.getElementById('help-panel').addEventListener('toggle', e => {
+    document.body.classList.toggle('show-hints', e.target.open);
+  });
+</script>
 
 <div class="main">
 
