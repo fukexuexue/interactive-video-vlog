@@ -1,1042 +1,1317 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Introvert Diaries — Interactive Vlog</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8"/>
+<title>The Bajo People — Interactive Documentary</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      background: #0f0f17;
-      color: #e8e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+body {
+  background: #060c18;
+  color: #a8becc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-    header {
-      padding: 14px 32px;
-      border-bottom: 1px solid #1e1e30;
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      flex-shrink: 0;
-    }
-    header h1 { font-size: 0.9rem; font-weight: 500; color: #555; }
-    header h2 { font-size: 1.15rem; font-weight: 600; }
+header {
+  padding: 11px 26px;
+  border-bottom: 1px solid #0e1e30;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-shrink: 0;
+}
+header h1 { font-size: 0.65rem; font-weight: 400; color: #2a3d52; letter-spacing: 2.5px; text-transform: uppercase; }
+header h2 { font-size: 1rem; font-weight: 500; color: #b8cede; }
 
-    .main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+.main { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
-    /* ══ LEFT: Clock ══ */
-    .clock-panel {
-      width: 370px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px 14px;
-      border-right: 1px solid #1e1e30;
-      gap: 12px;
-    }
-    .panel-label { font-size: 0.62rem; letter-spacing: 2.5px; text-transform: uppercase; color: #444; }
+/* ══ OCEAN PANEL ══ */
+.ocean-panel {
+  width: 358px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #0e1e30;
+}
+.ocean-label {
+  padding: 7px 12px;
+  font-size: 0.58rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #1a2d40;
+  border-bottom: 1px solid #0e1e30;
+  flex-shrink: 0;
+}
+.ocean-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+#ocean-svg {
+  flex: 1;
+  display: block;
+  cursor: pointer;
+}
+/* Depth ruler */
+.depth-ruler {
+  width: 42px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #0e1e30;
+  padding: 4px 0;
+}
+.d-mark {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-bottom: 1px solid #0e1e30;
+}
+.d-mark:last-child { border-bottom: none; }
+.d-num  { font-size: 0.58rem; color: #1e3348; font-weight: 600; letter-spacing: 0.3px; }
+.d-unit { font-size: 0.5rem;  color: #152230; }
 
-    #clock-svg { display: block; cursor: grab; user-select: none; }
-    #clock-svg:active { cursor: grabbing; }
+/* SVG layer transitions */
+.ocean-layer { transition: filter 0.25s; }
+.coral-el    { transition: filter 2s ease, opacity 2s ease; }
+.fish-g      { transition: opacity 2s ease; }
+#shockwave   { transition: opacity 1.5s ease; }
+#diver-g     { transition: opacity 1.8s ease; }
+#children-g  { transition: opacity 1.8s ease; }
 
-    .clock-hint { font-size: 0.66rem; color: #333; text-align: center; line-height: 1.6; }
+/* ══ RIGHT PANEL ══ */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 22px 12px;
+  gap: 11px;
+  min-width: 0;
+}
 
-    #related-info {
-      width: 100%;
-      padding: 8px 12px;
-      background: #13131f;
-      border-radius: 8px;
-      border: 1px solid #1e1e30;
-      font-size: 0.7rem;
-      color: #666;
-      line-height: 1.6;
-      opacity: 0;
-      transition: opacity 0.35s;
-      min-height: 48px;
-    }
-    #related-info.visible { opacity: 1; }
-    #related-info .ri-label { color: #444; font-size: 0.65rem; letter-spacing: 0.5px; }
-    #related-info .ri-segments { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
-    .ri-seg {
-      padding: 2px 9px; border-radius: 20px; font-size: 0.68rem;
-      border: 1px solid; cursor: pointer; transition: opacity 0.2s;
-    }
-    .ri-seg:hover { opacity: 0.7; }
+.clip-info {
+  flex-shrink: 0;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  min-height: 60px;
+}
+.clip-n {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #0e1e30;
+  line-height: 1;
+  width: 38px;
+  flex-shrink: 0;
+  transition: color 0.7s ease;
+  letter-spacing: -1px;
+}
+.clip-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.clip-depth { font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; color: #1e3348; }
+.clip-title { font-size: 1rem; font-weight: 600; color: #c4d8e8; transition: color 0.7s ease; }
+.clip-desc  { font-size: 0.72rem; color: #4a6878; line-height: 1.55; margin-top: 2px; }
+.clip-role  { font-size: 0.6rem;  color: #1a2d3e; margin-top: 3px; letter-spacing: 0.3px; font-style: italic; }
 
-    /* ══ RIGHT ══ */
-    .right-panel {
-      flex: 1; display: flex; flex-direction: column;
-      padding: 16px 24px 12px; gap: 10px; min-width: 0; overflow: hidden;
-    }
-    .activity-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-    .live-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #4ade80; animation: blink 1.8s ease-in-out infinite; flex-shrink: 0;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
-    .activity-dot { width: 10px; height: 10px; border-radius: 50%; background: #2a2a40; flex-shrink: 0; transition: background 0.3s; }
-    .activity-text { display: flex; gap: 8px; align-items: baseline; }
-    .activity-time { font-size: 0.7rem; color: #555; }
-    .activity-name { font-size: 1.05rem; font-weight: 600; }
+.video-wrapper {
+  position: relative; flex: 1; min-height: 0;
+  border-radius: 8px; overflow: hidden; background: #030810;
+}
+#video-player { width: 100%; height: 100%; object-fit: contain; display: block; }
+#idle-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; color: #122030; font-size: 0.78rem; pointer-events: none;
+}
+.idle-arr { font-size: 1.6rem; animation: drift 2.2s ease-in-out infinite; }
+@keyframes drift { 0%,100%{transform:translateX(0)} 50%{transform:translateX(-9px)} }
 
-    .video-wrapper {
-      position: relative; flex: 1; min-height: 0;
-      border-radius: 10px; overflow: hidden; background: #080810;
-    }
-    #video-player { width: 100%; height: 100%; object-fit: contain; display: block; outline: none; }
-    #idle-overlay {
-      position: absolute; inset: 0; display: flex; align-items: center;
-      justify-content: center; color: #2a2a40; font-size: 0.85rem; pointer-events: none;
-    }
-    #video-click-hint {
-      position: absolute; top: 10px; right: 10px;
-      background: rgba(15,15,23,0.8); border: 1px solid #252535;
-      color: #666; font-size: 0.65rem; padding: 4px 10px;
-      border-radius: 20px; pointer-events: none; opacity: 0;
-      transition: opacity 0.3s; letter-spacing: 0.5px;
-    }
-    .video-wrapper:hover #video-click-hint { opacity: 1; }
+/* Timeline strip */
+.timeline-strip { flex-shrink: 0; display: flex; gap: 4px; height: 34px; }
+.t-seg {
+  flex: 1; border-radius: 5px; border: 1px solid #0e1e30;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 0.6rem; color: #1a2d40;
+  transition: all 0.3s; text-align: center; padding: 0 3px; gap: 4px;
+}
+.t-seg:hover { border-color: #2a4060; color: #5a8aaa; }
+.t-seg .t-n  { font-weight: 700; font-size: 0.75rem; }
+.t-seg .t-label { font-size: 0.55rem; letter-spacing: 0.3px; display: none; }
+.t-seg.active .t-label { display: block; }
 
-    #entity-strip {
-      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-      flex-wrap: wrap; min-height: 34px; padding: 0 2px;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s;
-    }
-    #entity-strip.visible { opacity: 1; pointer-events: auto; }
-    .strip-label { font-size: 0.64rem; color: #3a3a55; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+/* ══ DYNAMITE ══ */
+#dynamite-group {
+  cursor: grab;
+  filter: drop-shadow(0 0 6px rgba(220,60,40,0.45));
+  transition: filter 0.25s;
+}
+#dynamite-group:hover   { filter: drop-shadow(0 0 12px rgba(255,80,40,0.75)); }
+#dynamite-group.dy-drag { cursor: grabbing; filter: drop-shadow(0 0 20px rgba(255,100,40,1)); }
 
-    .ent-chip {
-      display: inline-flex; align-items: center; padding: 2px 9px;
-      border-radius: 20px; font-size: 0.7rem; font-weight: 500;
-      cursor: pointer; border: 1px solid; white-space: nowrap;
-      transition: opacity 0.15s, transform 0.15s;
-    }
-    .ent-chip:hover { opacity: 0.7; transform: translateY(-1px); }
-    .ent-chip.active-entity { outline: 2px solid rgba(255,255,255,0.45); }
+@keyframes fuse-blink {
+  0%,100% { opacity: 1;   fill: #f9d874; }
+  50%      { opacity: 0.2; fill: #f57f17; }
+}
+#fuse-spark { animation: fuse-blink 0.65s ease-in-out infinite; }
 
-    .script-panel {
-      flex-shrink: 0; height: 168px; border: 1px solid #1e1e30;
-      border-radius: 10px; overflow: hidden; display: flex;
-      flex-direction: column; background: #0b0b14;
-    }
-    .script-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 14px; border-bottom: 1px solid #1e1e30; flex-shrink: 0;
-    }
-    .script-header span:first-child { font-size: 0.7rem; color: #555; letter-spacing: 0.5px; }
-    .script-sub { font-size: 0.63rem; color: #2e2e45; }
-    #transcript {
-      overflow-y: auto; padding: 10px 14px;
-      display: flex; flex-direction: column; gap: 8px; flex: 1;
-    }
-    #transcript::-webkit-scrollbar { width: 3px; }
-    #transcript::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 3px; }
-    .t-line { font-size: 0.76rem; color: #666; line-height: 1.65; }
-    .t-line .ent-chip { font-size: 0.68rem; padding: 1px 7px; vertical-align: middle; }
-    .t-idle { font-size: 0.72rem; color: #222; padding: 16px 0; text-align: center; }
+#throw-arc, #explosion-rings { pointer-events: none; }
 
-    #tooltip {
-      position: fixed; background: rgba(8,8,18,0.96); border: 1px solid #252535;
-      color: #ccc; padding: 5px 11px; border-radius: 8px; font-size: 0.72rem;
-      pointer-events: none; display: none; z-index: 999; white-space: nowrap;
-    }
+/* ══ FISHERMAN ══ */
+#fisherman-group {
+  cursor: grab;
+  filter: drop-shadow(0 0 7px rgba(80,160,255,0.45));
+  transition: filter 0.3s;
+}
+#fisherman-group:hover  { filter: drop-shadow(0 0 12px rgba(80,160,255,0.7)); }
+#fisherman-group.dragging { cursor: grabbing; filter: drop-shadow(0 0 18px rgba(80,160,255,0.9)); }
 
-    /* SVG animations */
-    @keyframes ring-pulse { 0%,100%{opacity:.15} 50%{opacity:.9} }
-    .seg-ring { animation: ring-pulse 1.4s ease-in-out infinite; }
-    @keyframes hand-appear { from{opacity:0} to{opacity:1} }
+#fisher-surface, #fisher-underwater { transition: opacity 0.38s ease; }
+#fish-line-dyn  { pointer-events: none; transition: opacity 0.4s ease; }
 
-    /* ══ HOTSPOT SYSTEM ══ */
-    #hotspot-layer {
-      position: absolute; inset: 0;
-      pointer-events: none; z-index: 10;
-    }
+.layer-flash    { transition: filter 0.28s ease; }
 
-    .hotspot {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      display: flex; flex-direction: column; align-items: center; gap: 5px;
-      pointer-events: auto; cursor: pointer; user-select: none;
-      transition: opacity 0.5s;
-    }
-
-    .hotspot-icon {
-      filter: drop-shadow(0 0 10px rgba(243,114,44,0.7));
-      animation: hs-float 2.2s ease-in-out infinite;
-      transition: filter 0.2s;
-    }
-    @keyframes hs-float {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-5px); }
-    }
-    /* bounce on single click */
-    .hotspot.bounce .hotspot-icon {
-      animation: hs-bounce 0.35s ease;
-    }
-    @keyframes hs-bounce {
-      0%   { transform: scale(1); }
-      40%  { transform: scale(1.22); }
-      70%  { transform: scale(0.95); }
-      100% { transform: scale(1); }
-    }
-
-    /* Each SVG part can animate independently */
-    .hs-part {
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-
-    .hotspot-badge {
-      background: rgba(10,10,22,0.88);
-      border: 1px solid rgba(243,114,44,0.55);
-      color: #f3722c; font-size: 0.62rem; font-weight: 600;
-      padding: 3px 10px; border-radius: 20px; white-space: nowrap;
-      letter-spacing: 0.4px; transition: opacity 0.3s;
-    }
-
-    /* Flash overlay when hotspot triggers */
-    #connect-flash {
-      position: absolute; inset: 0; pointer-events: none; z-index: 30;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 10px; opacity: 0;
-      background: radial-gradient(circle, rgba(243,114,44,0.18) 0%, transparent 70%);
-      transition: opacity 0.2s;
-    }
-    #connect-flash.show { opacity: 1; }
-    #connect-flash .flash-label {
-      color: #f3722c; font-size: 0.8rem; font-weight: 600;
-      letter-spacing: 1px; text-transform: uppercase;
-      background: rgba(10,10,22,0.85);
-      border: 1px solid rgba(243,114,44,0.4);
-      padding: 8px 20px; border-radius: 30px;
-    }
-
-    /* Extended-content back button */
-    #back-btn {
-      position: absolute; bottom: 52px; left: 12px;
-      background: rgba(10,10,22,0.85); border: 1px solid #252535;
-      color: #888; font-size: 0.65rem; padding: 4px 10px;
-      border-radius: 20px; cursor: pointer; pointer-events: auto;
-      display: none; z-index: 20; transition: color 0.2s;
-    }
-    #back-btn:hover { color: #e8e8f0; }
-    #back-btn.visible { display: block; }
-  </style>
+/* Tooltip */
+#tooltip {
+  position: fixed; background: rgba(3,8,18,0.96);
+  border: 1px solid #122030; color: #6a9ab8;
+  padding: 5px 11px; border-radius: 6px; font-size: 0.68rem;
+  pointer-events: none; display: none; z-index: 99; white-space: nowrap;
+}
+</style>
 </head>
 <body>
 
 <header>
-  <h1>Introvert Diaries ☀️</h1>
-  <h2>5AM Productive Day in My Life</h2>
+  <h1>Documentary</h1>
+  <h2>The Bajo People — Living with the Sea</h2>
 </header>
 
 <div class="main">
 
-  <div class="clock-panel">
-    <div class="panel-label">Your day, your way</div>
+  <!-- LEFT: Ocean navigation -->
+  <div class="ocean-panel">
+    <div class="ocean-label">Summary · Click a layer to watch</div>
+    <div class="ocean-body">
 
-    <svg id="clock-svg" width="308" height="308" viewBox="-154 -154 308 308">
-      <defs>
-        <!-- Glow filter for active segment -->
-        <filter id="seg-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="4" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <!-- Soft glow for connection lines -->
-        <filter id="line-glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-    </svg>
+      <svg id="ocean-svg" viewBox="0 0 310 500" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="sky-g"     x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#071428"/>
+            <stop offset="55%"  stop-color="#123568"/>
+            <stop offset="100%" stop-color="#195a8a"/>
+          </linearGradient>
+          <linearGradient id="shal-g"    x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#106888"/>
+            <stop offset="100%" stop-color="#0a4565"/>
+          </linearGradient>
+          <linearGradient id="mid-g"     x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#0a4565"/>
+            <stop offset="100%" stop-color="#062640"/>
+          </linearGradient>
+          <linearGradient id="deep-g"    x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#062640"/>
+            <stop offset="100%" stop-color="#020c1e"/>
+          </linearGradient>
+          <linearGradient id="abyss-g"   x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#020c1e"/>
+            <stop offset="100%" stop-color="#010508"/>
+          </linearGradient>
+          <radialGradient id="sun-g" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#f9d56e" stop-opacity="1"/>
+            <stop offset="65%"  stop-color="#f4a61d" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#e67e22" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
 
-    <div class="clock-hint">
-      Drag the clock to seek · click entities to connect
-    </div>
-    <div id="related-info">
-      <div class="ri-label"></div>
-      <div class="ri-segments"></div>
-    </div>
-  </div>
+        <!-- ════════════════════════════
+             LAYER 1 — SKY / SURFACE
+             y: 0–95
+        ════════════════════════════ -->
+        <g id="layer-living" class="ocean-layer" data-clip="living">
+          <rect x="0" y="0" width="310" height="95" fill="url(#sky-g)"/>
 
+          <!-- Sun -->
+          <circle cx="274" cy="24" r="30" fill="url(#sun-g)" opacity="0.85"/>
+          <circle cx="274" cy="24" r="13" fill="#f9d56e" opacity="0.95"/>
+
+          <!-- Clouds -->
+          <ellipse cx="55"  cy="16" rx="32" ry="9"  fill="rgba(180,210,235,0.14)"/>
+          <ellipse cx="40"  cy="13" rx="18" ry="7"  fill="rgba(180,210,235,0.10)"/>
+          <ellipse cx="72"  cy="19" rx="22" ry="6"  fill="rgba(180,210,235,0.10)"/>
+          <ellipse cx="158" cy="11" rx="26" ry="7"  fill="rgba(180,210,235,0.10)"/>
+          <ellipse cx="172" cy="15" rx="17" ry="5"  fill="rgba(180,210,235,0.08)"/>
+
+          <!-- Seagulls -->
+          <path d="M102 28 Q106 24 110 28" stroke="rgba(160,200,225,0.65)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+          <path d="M118 22 Q122 18 127 22" stroke="rgba(160,200,225,0.55)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <path d="M132 31 Q135 28 139 31" stroke="rgba(160,200,225,0.50)" stroke-width="1"   fill="none" stroke-linecap="round"/>
+
+          <!-- Stilt village (5 houses, horizon silhouette) -->
+          <!-- House 1 -->
+          <polygon points="15,56 26,44 37,56"     fill="#091e38" opacity="0.92"/>
+          <rect x="16" y="56" width="20" height="14" rx="1" fill="#091e38" opacity="0.92"/>
+          <rect x="20" y="62" width="6" height="5" rx="1"  fill="#143358" opacity="0.5"/>
+          <line x1="20" y1="70" x2="20" y2="82"  stroke="#091e38" stroke-width="2.2"/>
+          <line x1="32" y1="70" x2="32" y2="82"  stroke="#091e38" stroke-width="2.2"/>
+          <!-- House 2 -->
+          <polygon points="48,53 61,40 74,53"     fill="#0b2240" opacity="0.88"/>
+          <rect x="49" y="53" width="24" height="17" rx="1" fill="#0b2240" opacity="0.88"/>
+          <rect x="53" y="58" width="7" height="6"  rx="1" fill="#163a5e" opacity="0.5"/>
+          <rect x="63" y="58" width="7" height="6"  rx="1" fill="#163a5e" opacity="0.5"/>
+          <line x1="54" y1="70" x2="54" y2="82"  stroke="#0b2240" stroke-width="2.5"/>
+          <line x1="68" y1="70" x2="68" y2="82"  stroke="#0b2240" stroke-width="2.5"/>
+          <!-- House 3 (largest) -->
+          <polygon points="84,57 100,42 116,57"   fill="#0d2846" opacity="0.86"/>
+          <rect x="85" y="57" width="30" height="18" rx="1" fill="#0d2846" opacity="0.86"/>
+          <rect x="90" y="62" width="8" height="7"  rx="1" fill="#1a4068" opacity="0.5"/>
+          <rect x="101" y="62" width="8" height="7" rx="1" fill="#1a4068" opacity="0.5"/>
+          <line x1="90"  y1="75" x2="90"  y2="82" stroke="#0d2846" stroke-width="2.5"/>
+          <line x1="110" y1="75" x2="110" y2="82" stroke="#0d2846" stroke-width="2.5"/>
+          <!-- House 4 -->
+          <polygon points="126,59 140,47 154,59"  fill="#0b2440" opacity="0.82"/>
+          <rect x="127" y="59" width="26" height="15" rx="1" fill="#0b2440" opacity="0.82"/>
+          <rect x="132" y="64" width="6" height="5" rx="1" fill="#143356" opacity="0.45"/>
+          <line x1="132" y1="74" x2="132" y2="82" stroke="#0b2440" stroke-width="2.2"/>
+          <line x1="148" y1="74" x2="148" y2="82" stroke="#0b2440" stroke-width="2.2"/>
+          <!-- House 5 (distant, smaller) -->
+          <polygon points="196,62 207,53 218,62"  fill="#091e36" opacity="0.7"/>
+          <rect x="197" y="62" width="20" height="13" rx="1" fill="#091e36" opacity="0.7"/>
+          <line x1="201" y1="75" x2="201" y2="82" stroke="#091e36" stroke-width="1.8"/>
+          <line x1="213" y1="75" x2="213" y2="82" stroke="#091e36" stroke-width="1.8"/>
+
+          <!-- Fishing boat -->
+          <path d="M162 75 Q183 70 212 72 Q220 73 218 80 Q200 85 165 84 Z" fill="#1a3e5e" opacity="0.9"/>
+          <path d="M165 84 Q192 88 216 81" stroke="rgba(26,90,138,0.4)" stroke-width="1.5" fill="none"/>
+          <line x1="188" y1="71" x2="188" y2="54" stroke="#0f2a42" stroke-width="2"/>
+          <line x1="180" y1="60" x2="196" y2="60" stroke="#0f2a42" stroke-width="1.5"/>
+          <polygon points="196,60 207,64 196,69" fill="#1a3a5c" opacity="0.55"/>
+
+          <!-- Water surface -->
+          <path d="M0 89 Q22 85 44 89 Q66 93 88 89 Q110 85 132 89 Q154 93 176 89 Q198 85 220 89 Q242 93 264 89 Q286 85 310 89"
+                stroke="rgba(80,180,240,0.3)" stroke-width="1.5" fill="none"/>
+          <rect x="0" y="89" width="310" height="6" fill="rgba(16,104,136,0.35)" rx="0"/>
+
+          <!-- Transparent hit area -->
+          <rect x="0" y="0" width="310" height="95" fill="transparent"/>
+        </g>
+
+        <!-- ════════════════════════════
+             LAYER 2 — SHALLOW / FISHING
+             y: 95–215
+        ════════════════════════════ -->
+        <g id="layer-fishing" class="ocean-layer" data-clip="fishing">
+          <rect x="0" y="95" width="310" height="120" fill="url(#shal-g)"/>
+
+          <!-- Light rays -->
+          <polygon points="95,95 112,95 128,215 79,215"  fill="rgba(190,235,255,0.042)"/>
+          <polygon points="148,95 160,95 172,215 136,215" fill="rgba(190,235,255,0.050)"/>
+          <polygon points="198,95 208,95 218,215 188,215" fill="rgba(190,235,255,0.035)"/>
+
+          <!-- Fish school A — dense, golden -->
+          <g id="fish-a" class="fish-g">
+            <g fill="#f9c74f" opacity="0.88">
+              <ellipse cx="42"  cy="120" rx="7"   ry="3.5"/><polygon points="34,117 27,120 34,123" fill="#f9c74f"/>
+              <ellipse cx="66"  cy="113" rx="6.5" ry="3.2"/><polygon points="59,110 52,113 59,116" fill="#f9c74f"/>
+              <ellipse cx="88"  cy="124" rx="7"   ry="3.5"/><polygon points="80,121 73,124 80,127" fill="#f9c74f"/>
+              <ellipse cx="112" cy="115" rx="6"   ry="3"/><polygon points="106,112 100,115 106,118" fill="#f9c74f"/>
+              <ellipse cx="54"  cy="134" rx="5.5" ry="2.8"/><polygon points="48,131 42,134 48,137" fill="#f9c74f"/>
+              <ellipse cx="76"  cy="140" rx="6"   ry="3"/><polygon points="70,137 64,140 70,143" fill="#f9c74f"/>
+              <ellipse cx="98"  cy="128" rx="5"   ry="2.5"/><polygon points="93,126 88,128 93,130" fill="#f9c74f"/>
+              <ellipse cx="30"  cy="108" rx="5"   ry="2.5"/><polygon points="25,106 20,108 25,110" fill="#f9c74f"/>
+            </g>
+            <!-- Fish school B — blue/cyan -->
+            <g fill="#48cae4" opacity="0.72">
+              <ellipse cx="140" cy="126" rx="6"   ry="3"/><polygon points="134,123 128,126 134,129" fill="#48cae4"/>
+              <ellipse cx="158" cy="134" rx="5.5" ry="2.8"/><polygon points="152,131 146,134 152,137" fill="#48cae4"/>
+              <ellipse cx="128" cy="142" rx="5"   ry="2.5"/><polygon points="123,139 118,142 123,145" fill="#48cae4"/>
+              <ellipse cx="172" cy="119" rx="6"   ry="3"/><polygon points="166,116 160,119 166,122" fill="#48cae4"/>
+              <ellipse cx="150" cy="148" rx="4.5" ry="2.2"/><polygon points="145,146 140,148 145,150" fill="#48cae4"/>
+              <ellipse cx="188" cy="132" rx="5"   ry="2.5"/><polygon points="183,130 178,132 183,134" fill="#48cae4"/>
+            </g>
+            <!-- Fish school C — deeper, smaller, lighter -->
+            <g fill="#ade8f4" opacity="0.55">
+              <ellipse cx="52"  cy="172" rx="4.5" ry="2.2"/><polygon points="47,170 43,172 47,174" fill="#ade8f4"/>
+              <ellipse cx="80"  cy="165" rx="5"   ry="2.5"/><polygon points="75,163 70,165 75,167" fill="#ade8f4"/>
+              <ellipse cx="108" cy="173" rx="4"   ry="2"/><polygon points="104,171 100,173 104,175" fill="#ade8f4"/>
+              <ellipse cx="192" cy="162" rx="4.5" ry="2.2"/><polygon points="187,160 182,162 187,164" fill="#ade8f4"/>
+              <ellipse cx="220" cy="170" rx="4"   ry="2"/><polygon points="216,168 212,170 216,172" fill="#ade8f4"/>
+              <ellipse cx="250" cy="155" rx="4"   ry="2"/><polygon points="246,153 242,155 246,157" fill="#ade8f4"/>
+            </g>
+          </g>
+
+          <!-- Diver -->
+          <g id="diver-g" opacity="0.85">
+            <ellipse cx="254" cy="122" rx="7" ry="8" fill="#1a3a5c"/>
+            <rect x="249" y="120" width="12" height="7" rx="2" fill="#2980b9" opacity="0.8"/>
+            <rect x="251" y="130" width="7" height="22" rx="3" fill="#1a3a5c"/>
+            <line x1="251" y1="136" x2="240" y2="147" stroke="#1a3a5c" stroke-width="4" stroke-linecap="round"/>
+            <line x1="258" y1="136" x2="268" y2="144" stroke="#1a3a5c" stroke-width="4" stroke-linecap="round"/>
+            <line x1="268" y1="144" x2="294" y2="154" stroke="#253c52" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="294,152 301,154 294,156" fill="#253c52"/>
+            <ellipse cx="251" cy="153" rx="9" ry="3" fill="#1a3a5c" transform="rotate(-18,251,153)"/>
+            <ellipse cx="261" cy="153" rx="9" ry="3" fill="#1a3a5c" transform="rotate(14,261,153)"/>
+            <circle cx="248" cy="116" r="2.2" fill="rgba(160,225,255,0.5)"/>
+            <circle cx="244" cy="108" r="1.6" fill="rgba(160,225,255,0.4)"/>
+            <circle cx="247" cy="101" r="1.1" fill="rgba(160,225,255,0.35)"/>
+            <circle cx="243" cy="95"  r="0.8" fill="rgba(160,225,255,0.28)"/>
+          </g>
+
+          <!-- Sea floor + coral (healthy) -->
+          <rect x="0" y="207" width="310" height="8" fill="#093446" opacity="0.9"/>
+
+          <g id="coral-shallow" class="coral-el">
+            <!-- Coral 1: branching magenta -->
+            <g stroke="#e040a0" stroke-width="3.5" stroke-linecap="round" fill="none">
+              <line x1="36" y1="207" x2="36" y2="182"/>
+              <line x1="36" y1="196" x2="24" y2="179"/>
+              <line x1="36" y1="189" x2="48" y2="174"/>
+              <line x1="24" y1="185" x2="15" y2="175"/>
+              <line x1="48" y1="181" x2="54" y2="171"/>
+            </g>
+            <g fill="#ff6ec7" opacity="0.85">
+              <circle cx="36" cy="182" r="3.2"/><circle cx="24" cy="179" r="2.8"/>
+              <circle cx="48" cy="174" r="2.8"/><circle cx="15" cy="175" r="2.2"/>
+              <circle cx="54" cy="171" r="2.2"/>
+            </g>
+            <!-- Coral 2: brain coral, amber -->
+            <ellipse cx="108" cy="202" rx="22" ry="11" fill="#f4a61d" opacity="0.88"/>
+            <path d="M88 202 Q95 196 104 202 Q112 208 120 202 Q127 196 130 202" stroke="#b07800" stroke-width="1.5" fill="none" opacity="0.45"/>
+            <!-- Coral 3: branching purple -->
+            <g stroke="#9b59b6" stroke-width="3" stroke-linecap="round" fill="none">
+              <line x1="168" y1="207" x2="168" y2="184"/>
+              <line x1="168" y1="198" x2="157" y2="181"/>
+              <line x1="168" y1="191" x2="178" y2="178"/>
+              <line x1="157" y1="190" x2="149" y2="180"/>
+            </g>
+            <g fill="#c078e0" opacity="0.85">
+              <circle cx="168" cy="184" r="3"/><circle cx="157" cy="181" r="2.5"/>
+              <circle cx="178" cy="178" r="2.5"/><circle cx="149" cy="180" r="2"/>
+            </g>
+            <!-- Coral 4: fan coral, emerald -->
+            <path d="M224 207 Q213 186 218 172 Q226 158 236 172 Q242 186 232 207 Z" fill="#27ae60" opacity="0.78"/>
+            <path d="M228 207 Q224 194 226 182 Q229 170 232 182 Q234 194 230 207 Z" fill="#2ecc71" opacity="0.45"/>
+            <!-- Coral 5: small branching, teal -->
+            <g stroke="#16a085" stroke-width="2.5" stroke-linecap="round" fill="none">
+              <line x1="276" y1="207" x2="276" y2="191"/>
+              <line x1="276" y1="200" x2="267" y2="189"/>
+              <line x1="276" y1="195" x2="284" y2="186"/>
+            </g>
+            <g fill="#1abc9c" opacity="0.82">
+              <circle cx="276" cy="191" r="2.8"/>
+              <circle cx="267" cy="189" r="2.2"/>
+              <circle cx="284" cy="186" r="2.2"/>
+            </g>
+          </g>
+
+          <rect x="0" y="95" width="310" height="120" fill="transparent"/>
+        </g>
+
+        <!-- ════════════════════════════
+             LAYER 3 — MID / ECONOMIC
+             y: 215–325
+        ════════════════════════════ -->
+        <g id="layer-economic" class="ocean-layer" data-clip="economic">
+          <rect x="0" y="215" width="310" height="110" fill="url(#mid-g)"/>
+
+          <!-- Sparse fish -->
+          <g id="fish-mid" class="fish-g" opacity="0.6">
+            <g fill="#90e0ef">
+              <ellipse cx="52"  cy="242" rx="6"   ry="3"/><polygon points="46,239 40,242 46,245" fill="#90e0ef"/>
+              <ellipse cx="132" cy="256" rx="5.5" ry="2.8"/><polygon points="126,253 120,256 126,259" fill="#90e0ef"/>
+              <ellipse cx="202" cy="246" rx="6"   ry="3"/><polygon points="196,243 190,246 196,249" fill="#90e0ef"/>
+              <ellipse cx="262" cy="262" rx="5"   ry="2.5"/><polygon points="257,260 252,262 257,264" fill="#90e0ef"/>
+              <ellipse cx="82"  cy="272" rx="4.5" ry="2.2"/><polygon points="77,270 72,272 77,274" fill="#90e0ef"/>
+            </g>
+          </g>
+
+          <!-- Economic pressure symbols — very subtle -->
+          <g opacity="0.12" fill="none" stroke="#f9c74f" stroke-width="1.2">
+            <circle cx="158" cy="252" r="9"/>
+            <text x="154" y="256" font-size="10" fill="#f9c74f" stroke="none" opacity="0.15">$</text>
+            <path d="M174 244 L174 260 M168 252 L174 260 L180 252" stroke-width="1.8"/>
+          </g>
+
+          <!-- Fading coral at base -->
+          <g id="coral-mid" class="coral-el" opacity="0.65">
+            <g stroke="#b03080" stroke-width="2.5" stroke-linecap="round" fill="none">
+              <line x1="68" y1="325" x2="68" y2="307"/>
+              <line x1="68" y1="317" x2="57" y2="305"/>
+              <line x1="68" y1="311" x2="78" y2="303"/>
+            </g>
+            <g stroke="#7a3a9a" stroke-width="2" stroke-linecap="round" fill="none">
+              <line x1="204" y1="325" x2="204" y2="309"/>
+              <line x1="204" y1="318" x2="193" y2="307"/>
+              <line x1="204" y1="313" x2="214" y2="304"/>
+            </g>
+          </g>
+
+          <rect x="0" y="318" width="310" height="7" fill="#062034" opacity="0.9"/>
+          <rect x="0" y="215" width="310" height="110" fill="transparent"/>
+        </g>
+
+        <!-- ════════════════════════════
+             LAYER 4 — DEEP / CRISIS
+             y: 325–430
+        ════════════════════════════ -->
+        <g id="layer-destructive" class="ocean-layer" data-clip="destructive">
+          <rect x="0" y="325" width="310" height="105" fill="url(#deep-g)"/>
+
+          <!-- Explosion shockwave -->
+          <g id="shockwave" opacity="0">
+            <ellipse cx="158" cy="362" rx="30" ry="15" fill="rgba(255,165,40,0.14)" stroke="rgba(255,165,40,0.38)" stroke-width="2.2"/>
+            <ellipse cx="158" cy="362" rx="48" ry="24" fill="none" stroke="rgba(255,165,40,0.20)" stroke-width="1.5"/>
+            <ellipse cx="158" cy="362" rx="66" ry="33" fill="none" stroke="rgba(255,165,40,0.10)" stroke-width="1"/>
+            <circle  cx="158" cy="357" r="5.5" fill="rgba(255,195,70,0.45)"/>
+          </g>
+
+          <!-- Cyanide haze -->
+          <path d="M75 340 Q108 328 148 336 Q178 344 205 330 Q230 318 258 335 Q268 342 262 356 Q246 368 215 360 Q182 352 158 364 Q132 376 100 366 Q72 357 68 344 Z"
+                fill="rgba(140,255,160,0.06)" opacity="0.9"/>
+
+          <!-- Isolated fish -->
+          <g id="fish-deep" class="fish-g" opacity="0.3">
+            <ellipse cx="40"  cy="352" rx="5.5" ry="2.8" fill="#bbb"/>
+            <polygon points="34,349 28,352 34,355" fill="#bbb"/>
+            <ellipse cx="272" cy="370" rx="4.5" ry="2.2" fill="#bbb"/>
+            <polygon points="267,368 262,370 267,372" fill="#bbb"/>
+          </g>
+
+          <!-- Bleached / broken coral -->
+          <g id="coral-deep" class="coral-el" opacity="0.88">
+            <g stroke="#b0bec5" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.72">
+              <line x1="48" y1="426" x2="48" y2="409"/>
+              <line x1="48" y1="418" x2="36" y2="407"/>
+              <line x1="48" y1="413" x2="58" y2="404"/>
+              <!-- broken tip -->
+              <line x1="36" y1="407" x2="28" y2="412"/>
+            </g>
+            <g stroke="#90a4ae" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.60">
+              <line x1="88"  y1="425" x2="108" y2="419"/>
+              <line x1="98"  y1="422" x2="96"  y2="412"/>
+            </g>
+            <!-- Broken fan -->
+            <path d="M190 426 Q183 410 187 400 Q193 391 199 400 Q205 410 197 426 Z"
+                  fill="none" stroke="#90a4ae" stroke-width="1.5" opacity="0.5"/>
+            <g stroke="#b0bec5" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.65">
+              <line x1="244" y1="426" x2="244" y2="411"/>
+              <line x1="244" y1="420" x2="233" y2="409"/>
+              <line x1="244" y1="415" x2="253" y2="407"/>
+            </g>
+            <!-- Debris -->
+            <ellipse cx="132" cy="426" rx="13" ry="3" fill="#607d8b" opacity="0.28"/>
+            <ellipse cx="215" cy="427" rx="9"  ry="2" fill="#607d8b" opacity="0.22"/>
+          </g>
+
+          <rect x="0" y="422" width="310" height="8" fill="#020c1e" opacity="0.95"/>
+          <rect x="0" y="325" width="310" height="105" fill="transparent"/>
+        </g>
+
+        <!-- ════════════════════════════
+             LAYER 5 — ABYSS / FUTURE
+             y: 430–500
+        ════════════════════════════ -->
+        <g id="layer-future" class="ocean-layer" data-clip="future">
+          <rect x="0" y="430" width="310" height="70" fill="url(#abyss-g)"/>
+
+          <!-- Faint surface light from above -->
+          <polygon points="105,430 205,430 178,500 132,500" fill="rgba(20,60,130,0.07)"/>
+
+          <!-- Children silhouettes — looking upward -->
+          <g id="children-g" opacity="0.55">
+            <!-- Child 1 (left) -->
+            <g fill="#091520" opacity="0.9">
+              <circle cx="82" cy="463" r="6.5"/>
+              <rect x="79" y="469" width="7" height="18" rx="3"/>
+              <line x1="79" y1="475" x2="69"  y2="486" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="86" y1="475" x2="93"  y2="483" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="80" y1="487" x2="77"  y2="499" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="85" y1="487" x2="88"  y2="499" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+            <!-- Child 2 (center, taller) -->
+            <g fill="#091520" opacity="0.9">
+              <circle cx="155" cy="458" r="7.5"/>
+              <rect x="151" y="465" width="8" height="22" rx="3"/>
+              <line x1="151" y1="472" x2="140" y2="481" stroke="#091520" stroke-width="4" stroke-linecap="round"/>
+              <line x1="159" y1="472" x2="169" y2="479" stroke="#091520" stroke-width="4" stroke-linecap="round"/>
+              <line x1="152" y1="487" x2="148" y2="499" stroke="#091520" stroke-width="4" stroke-linecap="round"/>
+              <line x1="157" y1="487" x2="161" y2="499" stroke="#091520" stroke-width="4" stroke-linecap="round"/>
+            </g>
+            <!-- Child 3 (right) -->
+            <g fill="#091520" opacity="0.9">
+              <circle cx="228" cy="464" r="6.5"/>
+              <rect x="225" y="470" width="7" height="18" rx="3"/>
+              <line x1="225" y1="476" x2="215" y2="485" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="232" y1="476" x2="240" y2="483" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="226" y1="488" x2="223" y2="499" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+              <line x1="231" y1="488" x2="234" y2="499" stroke="#091520" stroke-width="3.5" stroke-linecap="round"/>
+            </g>
+          </g>
+
+          <!-- Distant boat silhouette (far above) -->
+          <path d="M118 436 Q155 431 192 436 Q188 443 155 445 Q122 443 Z"
+                fill="rgba(20,50,90,0.18)" opacity="0.6"/>
+
+          <rect x="0" y="430" width="310" height="70" fill="transparent"/>
+        </g>
+
+        <!-- ════════════════════════════════════════
+             CHAPTER HEADER OVERLAYS
+             Always-visible summarization layer —
+             shows chapter #, title, time, one-line desc
+             at the boundary of each narrative section
+        ════════════════════════════════════════ -->
+        <g id="chapter-headers" style="pointer-events:none"
+           font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+
+          <!-- ── Chapter 1: Living with the Sea (y=0) ── -->
+          <rect x="0" y="0"   width="310" height="21" fill="rgba(4,10,22,0.72)"/>
+          <rect x="0" y="0"   width="3.5" height="21" fill="#27ae60"/>
+          <text x="9"   y="14.5" font-size="8.5" fill="#27ae60"              font-weight="700">01</text>
+          <text x="24"  y="14.5" font-size="8.5" fill="rgba(255,255,255,0.82)" font-weight="600">Living with the Sea</text>
+          <text x="305" y="9"    font-size="6.5" fill="rgba(255,255,255,0.38)" text-anchor="end" font-family="'SF Mono',monospace">0:00 – 2:35</text>
+          <text x="305" y="19"   font-size="6"   fill="rgba(255,255,255,0.22)" text-anchor="end" font-style="italic">Village, boats, children — identity rooted in the sea</text>
+
+          <!-- ── Chapter 2: Fishing Tradition (y=95) ── -->
+          <rect x="0" y="95"  width="310" height="21" fill="rgba(4,10,22,0.72)"/>
+          <rect x="0" y="95"  width="3.5" height="21" fill="#2980b9"/>
+          <text x="9"   y="109.5" font-size="8.5" fill="#2980b9"               font-weight="700">02</text>
+          <text x="24"  y="109.5" font-size="8.5" fill="rgba(255,255,255,0.82)" font-weight="600">Fishing as Tradition</text>
+          <text x="305" y="104"   font-size="6.5" fill="rgba(255,255,255,0.38)" text-anchor="end" font-family="'SF Mono',monospace">2:35 – 6:40</text>
+          <text x="305" y="114"   font-size="6"   fill="rgba(255,255,255,0.22)" text-anchor="end" font-style="italic">Diving, spearfishing — fishing as culture and family livelihood</text>
+
+          <!-- ── Chapter 3: Economic Pressure (y=215) ── -->
+          <rect x="0" y="215" width="310" height="21" fill="rgba(4,10,22,0.72)"/>
+          <rect x="0" y="215" width="3.5" height="21" fill="#e67e22"/>
+          <text x="9"   y="229.5" font-size="8.5" fill="#e67e22"               font-weight="700">03</text>
+          <text x="24"  y="229.5" font-size="8.5" fill="rgba(255,255,255,0.82)" font-weight="600">Fish Are Worth Less</text>
+          <text x="305" y="224"   font-size="6.5" fill="rgba(255,255,255,0.38)" text-anchor="end" font-family="'SF Mono',monospace">6:40 – 9:00</text>
+          <text x="305" y="234"   font-size="6"   fill="rgba(255,255,255,0.22)" text-anchor="end" font-style="italic">Falling prices — the livelihood can no longer be sustained</text>
+
+          <!-- ── Chapter 4: Destructive Fishing (y=325) ── -->
+          <rect x="0" y="325" width="310" height="21" fill="rgba(4,10,22,0.72)"/>
+          <rect x="0" y="325" width="3.5" height="21" fill="#c0392b"/>
+          <text x="9"   y="339.5" font-size="8.5" fill="#c0392b"               font-weight="700">04</text>
+          <text x="24"  y="339.5" font-size="8.5" fill="rgba(255,255,255,0.82)" font-weight="600">Destructive Fishing</text>
+          <text x="305" y="334"   font-size="6.5" fill="rgba(255,255,255,0.38)" text-anchor="end" font-family="'SF Mono',monospace">9:00 – 12:30</text>
+          <text x="305" y="344"   font-size="6"   fill="rgba(255,255,255,0.22)" text-anchor="end" font-style="italic">Cyanide, dynamite — desperation destroys the reef</text>
+
+          <!-- ── Chapter 5: Uncertain Future (y=430) ── -->
+          <rect x="0" y="430" width="310" height="21" fill="rgba(4,10,22,0.72)"/>
+          <rect x="0" y="430" width="3.5" height="21" fill="#8e44ad"/>
+          <text x="9"   y="444.5" font-size="8.5" fill="#8e44ad"               font-weight="700">05</text>
+          <text x="24"  y="444.5" font-size="8.5" fill="rgba(255,255,255,0.82)" font-weight="600">Uncertain Future</text>
+          <text x="305" y="439"   font-size="6.5" fill="rgba(255,255,255,0.38)" text-anchor="end" font-family="'SF Mono',monospace">12:30 – 16:12</text>
+          <text x="305" y="449"   font-size="6"   fill="rgba(255,255,255,0.22)" text-anchor="end" font-style="italic">Children, education — will the next generation leave the sea?</text>
+
+        </g><!-- /chapter-headers -->
+
+        <!-- Active layer indicator bar (right edge) -->
+        <rect id="active-bar" x="303" y="0" width="7" height="0"
+              rx="3" fill="#27ae60" opacity="0"
+              style="transition: y 0.7s ease, height 0.7s ease, fill 0.7s ease, opacity 0.5s ease"/>
+
+        <!-- ════════════════════════
+             DYNAMIC FISHING LINE
+             (from fisherman up to surface)
+        ════════════════════════ -->
+        <path id="fish-line-dyn"
+              d="M155 65 Q155 80 155 89"
+              stroke="rgba(160,210,255,0.5)" stroke-width="1.3"
+              fill="none" stroke-dasharray="5,4" opacity="0"/>
+
+        <!-- ════════════════════════
+             FISHERMAN
+             Drag him through the ocean
+             to navigate clips
+        ════════════════════════ -->
+        <g id="fisherman-group" transform="translate(155, 65)">
+
+          <!-- Layer-colored glow halo (very subtle) -->
+          <circle id="fisher-glow-circle" cx="0" cy="0" r="22"
+                  fill="#27ae60" opacity="0.08"/>
+
+          <!-- ── SURFACE version (y < 92) ── -->
+          <g id="fisher-surface">
+            <!-- Small canoe hull -->
+            <path d="M-26 11 Q0 5 26 11 L22 19 Q0 22 -22 19 Z"
+                  fill="#1e4060" opacity="0.92"/>
+            <path d="M-25 11 Q0 7 25 11"
+                  stroke="rgba(90,155,210,0.35)" stroke-width="1" fill="none"/>
+            <!-- Person: head + hat -->
+            <circle cx="0" cy="-2" r="7.5" fill="#162e4c"/>
+            <ellipse cx="0" cy="-9" rx="10" ry="3.2" fill="#1a3a5c" opacity="0.9"/>
+            <rect x="-6" y="-13" width="12" height="5" rx="2" fill="#1a3a5c" opacity="0.9"/>
+            <!-- Body -->
+            <rect x="-5" y="5" width="10" height="12" rx="3" fill="#162e4c"/>
+            <!-- Arm holding rod -->
+            <line x1="5"  y1="1"  x2="26" y2="-13"
+                  stroke="#162e4c" stroke-width="3" stroke-linecap="round"/>
+            <!-- Fishing rod -->
+            <line x1="4"  y1="0"  x2="28" y2="-14"
+                  stroke="#2a4a6a" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="28" cy="-14" r="1.8" fill="#2a4a6a"/>
+            <!-- Static line dropping from rod tip into water -->
+            <path d="M28 -14 Q32 5 26 28"
+                  stroke="rgba(180,215,255,0.4)" stroke-width="1"
+                  fill="none" stroke-dasharray="3,3"/>
+          </g>
+
+          <!-- ── UNDERWATER version (y >= 92) ── -->
+          <g id="fisher-underwater" opacity="0">
+            <!-- Diver (head-first, going down) -->
+            <circle cx="0" cy="-20" r="7.5" fill="#162e4c"/>
+            <!-- Mask / goggles -->
+            <rect x="-6" y="-24" width="12" height="7" rx="2.5"
+                  fill="#2980b9" opacity="0.75"/>
+            <!-- Body -->
+            <rect x="-4" y="-12" width="8" height="22" rx="3" fill="#162e4c"/>
+            <!-- Arms spread wide -->
+            <line x1="-4" y1="-3" x2="-22" y2="6"
+                  stroke="#162e4c" stroke-width="5" stroke-linecap="round"/>
+            <line x1="4"  y1="-3" x2="22"  y2="4"
+                  stroke="#162e4c" stroke-width="5" stroke-linecap="round"/>
+            <!-- Flippers -->
+            <ellipse cx="-5" cy="13" rx="11" ry="3.5" fill="#162e4c"
+                     transform="rotate(-22,-5,13)"/>
+            <ellipse cx="5"  cy="13" rx="11" ry="3.5" fill="#162e4c"
+                     transform="rotate(22,5,13)"/>
+            <!-- Bubbles rising from head -->
+            <circle cx="9"  cy="-26" r="3.5" fill="rgba(130,205,255,0.55)"/>
+            <circle cx="13" cy="-35" r="2.6" fill="rgba(130,205,255,0.45)"/>
+            <circle cx="7"  cy="-44" r="1.8" fill="rgba(130,205,255,0.38)"/>
+            <circle cx="11" cy="-52" r="1.2" fill="rgba(130,205,255,0.28)"/>
+          </g>
+
+          <!-- Drag hint (fades on first use) -->
+          <g id="fisher-hint" style="transition: opacity 0.6s">
+            <text x="0" y="34" text-anchor="middle"
+                  font-size="6.5" fill="rgba(100,155,210,0.65)"
+                  font-family="-apple-system,sans-serif" letter-spacing="0.8"
+                  style="pointer-events:none;user-select:none">↕ drag to dive</text>
+          </g>
+        </g><!-- /fisherman-group -->
+
+        <!-- ════════════════════════
+             THROW TRAJECTORY ARC
+             (shown while aiming)
+        ════════════════════════ -->
+        <path id="throw-arc" d="M0 0"
+              fill="none"
+              stroke="rgba(230,80,50,0.5)" stroke-width="1.8"
+              stroke-dasharray="5,4" opacity="0"/>
+
+        <!-- ════════════════════════
+             EXPLOSION RINGS
+             (animated on impact)
+        ════════════════════════ -->
+        <g id="explosion-rings" opacity="0">
+          <circle id="exp-r1" cx="0" cy="0" r="5"
+                  fill="rgba(255,160,30,0.35)"
+                  stroke="rgba(255,160,30,0.65)" stroke-width="2.5"/>
+          <circle id="exp-r2" cx="0" cy="0" r="5"
+                  fill="none" stroke="rgba(255,130,20,0.3)" stroke-width="2"/>
+          <circle id="exp-r3" cx="0" cy="0" r="5"
+                  fill="none" stroke="rgba(255,100,10,0.18)" stroke-width="1.5"/>
+        </g>
+
+        <!-- ════════════════════════
+             DYNAMITE
+             Drag & throw into water
+             → plays Destructive Fishing
+        ════════════════════════ -->
+        <g id="dynamite-group" transform="translate(234, 68)">
+
+          <!-- Glow halo -->
+          <circle id="dyn-glow" cx="0" cy="0" r="18" fill="#e74c3c" opacity="0.06"/>
+
+          <!-- Cylinder body -->
+          <rect x="-8" y="-24" width="16" height="32" rx="7" fill="#c0392b"/>
+          <rect x="-8" y="-24" width="16" height="32" rx="7"
+                fill="none" stroke="#a93226" stroke-width="1"/>
+
+          <!-- Wrap bands -->
+          <rect x="-8" y="-16" width="16" height="4" fill="#e74c3c" opacity="0.6"/>
+          <rect x="-8" y="-6"  width="16" height="4" fill="#e74c3c" opacity="0.6"/>
+          <rect x="-8" y="4"   width="16" height="4" fill="#e74c3c" opacity="0.6"/>
+
+          <!-- TNT label -->
+          <text x="0" y="-1" text-anchor="middle" dominant-baseline="middle"
+                font-size="5" fill="rgba(255,255,255,0.5)"
+                font-family="monospace" letter-spacing="0.8"
+                style="pointer-events:none;user-select:none">TNT</text>
+
+          <!-- Fuse cord -->
+          <path d="M0 8 Q6 2 4 -5 Q2 -10 6 -16"
+                stroke="#e67e22" stroke-width="2.5"
+                fill="none" stroke-linecap="round"/>
+
+          <!-- Fuse spark (CSS blink animation) -->
+          <circle id="fuse-spark" cx="6" cy="-16" r="3.5" fill="#f9c74f"/>
+
+          <!-- Hint text -->
+          <text id="dyn-hint" x="0" y="32"
+                text-anchor="middle" font-size="6.5"
+                fill="rgba(200,80,60,0.65)"
+                font-family="-apple-system,sans-serif"
+                style="pointer-events:none;user-select:none;transition:opacity 0.5s">
+            throw ↓
+          </text>
+        </g><!-- /dynamite-group -->
+
+      </svg><!-- /ocean-svg -->
+
+      <!-- Depth ruler (depth + timestamp) -->
+      <div class="depth-ruler">
+        <div class="d-mark"><span class="d-num">🌊</span><span class="d-unit">0:00</span></div>
+        <div class="d-mark"><span class="d-num">−5m</span><span class="d-unit">2:35</span></div>
+        <div class="d-mark"><span class="d-num">−15m</span><span class="d-unit">6:40</span></div>
+        <div class="d-mark"><span class="d-num">−35m</span><span class="d-unit">9:00</span></div>
+        <div class="d-mark"><span class="d-num">?</span><span class="d-unit">12:30</span></div>
+      </div>
+
+    </div><!-- /ocean-body -->
+  </div><!-- /ocean-panel -->
+
+  <!-- RIGHT: Video + info -->
   <div class="right-panel">
-    <div class="activity-row">
-      <div class="live-dot"></div>
-      <div class="activity-dot" id="activity-dot"></div>
-      <div class="activity-text">
-        <div class="activity-time" id="activity-time">Select a segment on the clock</div>
-        <div class="activity-name" id="activity-name">—</div>
+
+    <div class="clip-info">
+      <div class="clip-n" id="clip-n">—</div>
+      <div class="clip-text">
+        <div class="clip-depth" id="clip-depth">Select a layer to begin</div>
+        <div class="clip-title" id="clip-title">—</div>
+        <div class="clip-desc"  id="clip-desc"></div>
+        <div class="clip-role"  id="clip-role"></div>
       </div>
     </div>
 
-    <div class="video-wrapper" id="video-wrapper">
+    <div class="video-wrapper">
       <video id="video-player" controls></video>
-      <div id="idle-overlay">← Drag or click the clock to begin</div>
-      <div id="video-click-hint">🔍 Click to detect elements</div>
-      <!-- Hotspot layer: SVG overlays appear here at keyframes -->
-      <div id="hotspot-layer"></div>
-      <!-- Flash when hotspot triggers navigation -->
-      <div id="connect-flash"><div class="flash-label"></div></div>
-      <!-- Back to clip button (shown after extended video) -->
-      <button id="back-btn">← Back to clip</button>
-    </div>
-
-    <div id="entity-strip">
-      <span class="strip-label">In this moment:</span>
-      <div id="strip-chips"></div>
-    </div>
-
-    <div class="script-panel">
-      <div class="script-header">
-        <span>📜 Script</span>
-        <span class="script-sub">click highlighted entities → find connections on clock ↑</span>
+      <div id="idle-overlay">
+        <div class="idle-arr">←</div>
+        <div>Dive into a layer</div>
       </div>
-      <div id="transcript"><div class="t-idle">Select a clip to see its script</div></div>
     </div>
-  </div>
-</div>
 
+    <div class="timeline-strip" id="timeline-strip"></div>
+  </div>
+
+</div><!-- /main -->
 <div id="tooltip"></div>
 
 <script>
-/* ════════════════════════════════════════
-   DATA
-════════════════════════════════════════ */
-const SEGMENTS = [
-  { id:'morning', emoji:'☀️', name:'Morning Prep',       time:'5:00 AM',  color:'#f9c74f', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Morning_Preparation.mp4',                   start:-90,  end:-45  },
-  { id:'pilates', emoji:'🧘', name:'Pilates Class',       time:'6:30 AM',  color:'#f94144', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Practice_Pilates.mp4',                       start:-45,  end:0    },
-  { id:'matcha',  emoji:'🍵', name:'Matcha Ritual',       time:'8:00 AM',  color:'#43aa8b', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Morning_Matcha._Ritual.mp4',                 start:0,    end:45   },
-  { id:'tidy',    emoji:'🏠', name:'Tidy Room',           time:'8:30 AM',  color:'#577590', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Tidy_Room.mp4',                               start:45,   end:90   },
-  { id:'journal', emoji:'📓', name:'Journal & GoodNotes', time:'9:00 AM',  color:'#4d9de0', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Mindfulness_Routine_GoodNotes.Features.mp4', start:90,   end:135  },
-  { id:'work',    emoji:'💻', name:'Daily Work',          time:'10:00 AM', color:'#9b5de5', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Daily_Work.mp4',                              start:135,  end:180  },
-  { id:'grocery', emoji:'🛒', name:'Grocery Haul',        time:'5:00 PM',  color:'#f3722c', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Grocery_Shopping.Haul.mp4',                   start:180,  end:225  },
-  { id:'cooking', emoji:'🍳', name:'Cook Shakshuka',      time:'7:00 PM',  color:'#e63946', video:'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/Cooking_Shakshuka.mp4',                       start:225,  end:270  },
+/* ═══════════════════════════════════
+   CLIP DATA
+═══════════════════════════════════ */
+const CLIPS = [
+  {
+    id: 'living', n: 1,
+    depth: 'Surface  ·  00:00 – 02:35',
+    title: 'Living with the Sea',
+    desc:  'The Bajo people — their stilt village, boats, children, and an identity inseparable from the ocean.',
+    role:  'Establishes the world and its characters',
+    color: '#27ae60',
+    video: 'https://github.com/fukexuexue/interactive-video-fishing/releases/download/v1/Living_with_the_Sea.mp4',
+    layerId: 'layer-living',
+    barY: 0, barH: 95,
+  },
+  {
+    id: 'fishing', n: 2,
+    depth: 'Shallow  ·  02:35 – 06:40',
+    title: 'Fishing as Tradition',
+    desc:  'Traditional diving and spearfishing — fishing as inherited culture, joyful skill, and family livelihood.',
+    role:  'Shows identity, craft, and way of life',
+    color: '#2980b9',
+    video: 'https://github.com/fukexuexue/interactive-video-fishing/releases/download/v1/Fishing_Tradition_Family_Life.mp4',
+    layerId: 'layer-fishing',
+    barY: 95, barH: 120,
+  },
+  {
+    id: 'economic', n: 3,
+    depth: 'Mid water  ·  06:40 – 09:00',
+    title: 'Fish Are Worth Less',
+    desc:  'Fish grow harder to find, prices fall. The sea remains — but it can no longer reliably feed the family.',
+    role:  'Turning point: the livelihood is cracking',
+    color: '#e67e22',
+    video: 'https://github.com/fukexuexue/interactive-video-fishing/releases/download/v1/Economic_PressureFish_Worth_Less.mp4',
+    layerId: 'layer-economic',
+    barY: 215, barH: 110,
+  },
+  {
+    id: 'destructive', n: 4,
+    depth: 'Deep  ·  09:00 – 12:30',
+    title: 'Destructive Fishing',
+    desc:  'Economic desperation drives cyanide and dynamite fishing — the reefs that sustain life are now being destroyed.',
+    role:  'Crisis escalation: the wound deepens',
+    color: '#c0392b',
+    video: 'https://github.com/fukexuexue/interactive-video-fishing/releases/download/v1/Destructive.Fishing.and.Environmental.Crisis.mp4',
+    layerId: 'layer-destructive',
+    barY: 325, barH: 105,
+  },
+  {
+    id: 'future', n: 5,
+    depth: 'Depths  ·  12:30 – 16:12',
+    title: 'Uncertain Future',
+    desc:  'The fisherman\'s children — what world will they inherit? They still belong to the sea. But their path forward is open.',
+    role:  'The question left unanswered',
+    color: '#7d3c98',
+    video: 'https://github.com/fukexuexue/interactive-video-fishing/releases/download/v1/Uncertain.Future.for.the.Next.Generation.mp4',
+    layerId: 'layer-future',
+    barY: 430, barH: 70,
+  },
 ];
 
-const ENTITIES = {
-  pilates:   { label:'Pilates 🧘',       color:'#f94144' },
-  workout:   { label:'Workout 💪',       color:'#f94144' },
-  matcha:    { label:'Matcha 🍵',        color:'#43aa8b' },
-  france:    { label:'France 🇫🇷',      color:'#4d9de0' },
-  london:    { label:'London',           color:'#4d9de0' },
-  goodnotes: { label:'GoodNotes 📓',     color:'#9b5de5' },
-  shakshuka: { label:'Shakshuka 🍳',     color:'#f3722c' },
-  eggs:      { label:'Eggs 🥚',          color:'#f9c74f' },
-  skincare:  { label:'Skincare',         color:'#c77dff' },
-  ginger:    { label:'Ginger Shot 🫚',   color:'#90be6d' },
-  book:      { label:'The Housemaid 📚', color:'#457b9d' },
-  tidy:      { label:'Tidy Up 🏠',       color:'#577590' },
+/* ═══════════════════════════════════
+   ECOLOGICAL STATES
+   (SVG changes as narrative darkens)
+═══════════════════════════════════ */
+const ECO = {
+  living:      { coralF:'saturate(1) brightness(1)',      fishA:1,    midF:0.60, shockOp:0,   diverOp:0.25, childOp:0.38 },
+  fishing:     { coralF:'saturate(0.92) brightness(1.04)',fishA:0.88, midF:0.55, shockOp:0,   diverOp:0.88, childOp:0.38 },
+  economic:    { coralF:'saturate(0.32) brightness(1.22)',fishA:0.38, midF:0.38, shockOp:0,   diverOp:0.45, childOp:0.38 },
+  destructive: { coralF:'saturate(0) brightness(1.55)',   fishA:0.08, midF:0.12, shockOp:0.7, diverOp:0.12, childOp:0.38 },
+  future:      { coralF:'saturate(0) brightness(0.52)',   fishA:0.04, midF:0.06, shockOp:0.3, diverOp:0.05, childOp:0.95 },
 };
 
-const ENTITY_LINKS = {
-  pilates:   ['morning','pilates','matcha'],
-  workout:   ['morning','pilates','matcha'],
-  matcha:    ['morning','matcha'],
-  france:    ['matcha','journal','work'],
-  london:    ['journal','work'],
-  goodnotes: ['journal','work'],
-  shakshuka: ['grocery','cooking'],
-  eggs:      ['grocery','cooking'],
-  skincare:  ['morning'],
-  ginger:    ['morning'],
-  book:      ['cooking'],
-  tidy:      ['matcha','tidy'],
-};
+/* ═══════════════════════════════════
+   BUILD TIMELINE STRIP
+═══════════════════════════════════ */
+const strip = document.getElementById('timeline-strip');
+CLIPS.forEach(clip => {
+  const seg = document.createElement('div');
+  seg.className = 'timeline-seg';
+  seg.id = `ts-${clip.id}`;
+  seg.style.borderColor = clip.color + '33';
+  seg.innerHTML = `<span class="t-n">${clip.n}</span><span class="t-label">${clip.title}</span>`;
+  seg.addEventListener('click', () => selectClip(clip.id));
+  strip.appendChild(seg);
+});
 
-const CLIP_TIMELINE = {
-  morning: [ {from:0,  to:45,  entities:['skincare']}, {from:45, to:999, entities:['ginger','pilates','workout']} ],
-  pilates: [ {from:0,  to:999, entities:['pilates','workout']} ],
-  matcha:  [ {from:0,  to:55,  entities:['matcha','france']}, {from:55, to:110, entities:['matcha','workout']}, {from:110,to:999,entities:['tidy']} ],
-  tidy:    [ {from:0,  to:999, entities:['tidy']} ],
-  journal: [ {from:0,  to:65,  entities:['france','goodnotes']}, {from:65, to:999, entities:['goodnotes','london']} ],
-  work:    [ {from:0,  to:999, entities:['france','goodnotes']} ],
-  grocery: [ {from:0,  to:60,  entities:['shakshuka']}, {from:60, to:120, entities:['eggs','shakshuka']}, {from:120,to:999,entities:['eggs']} ],
-  cooking: [ {from:0,  to:55,  entities:['shakshuka']}, {from:55, to:105, entities:['eggs','shakshuka']}, {from:105,to:999,entities:['shakshuka','book']} ],
-};
+/* ═══════════════════════════════════
+   SVG LAYER INTERACTIONS
+═══════════════════════════════════ */
+let activeId = null;
 
-const TRANSCRIPTS = {
-  morning: [
-    { text:"I'm trying to use my jet lag for good — I booked a {pilates} class for 6:30 and I really want to eat before that." },
-    { text:"I really like this glazing milk — no fragrance. I'm experiencing some {skincare} issues after returning from my trip." },
-    { text:"I was going to make {matcha} but I'll just have this {ginger} shot — quick wake-up before my {workout} class." },
-  ],
-  pilates: [
-    { text:"6:30 AM {pilates} class — using jet lag to force myself into a morning routine." },
-    { text:"That {workout} absolutely destroyed my legs. Not even funny." },
-  ],
-  matcha: [
-    { text:"I just got a refill of my favorite {matcha} from Apoto Tea — I got this in {france}. Absolutely insane." },
-    { text:"My legs are so dead after that {workout}. But look at this {matcha} microfoam — beautiful!" },
-    { text:"I'm going to stay in my workout clothes and {tidy} my apartment because it is a wreck right now." },
-  ],
-  tidy: [
-    { text:"Quick {tidy} of the apartment before my mindfulness hour — been neglecting this for weeks." },
-    { text:"Getting everything clean and organized after a very full morning." },
-  ],
-  journal: [
-    { text:"I want to take some solo time to reflect with {goodnotes} — going through my favorite memories from {france}." },
-    { text:"Huge shoutout to {goodnotes} for sponsoring — I was invited to {london} for their launch event." },
-    { text:"The new {goodnotes} whiteboard has an infinite canvas — perfect for mind mapping." },
-  ],
-  work: [
-    { text:"First day back at the internship after {london} and then {france}. Really ambitious of me." },
-    { text:"I use {goodnotes} for pharmacy school and at my internship — it is so versatile." },
-  ],
-  grocery: [
-    { text:"I've been craving {shakshuka} for 3 weeks — ended up going to two stores to find whole canned tomatoes." },
-    { text:"Picked up {eggs}, onions, garlic, naan, parsley — everything for {shakshuka} tonight." },
-    { text:"Entire haul including tax — $90 Canadian. Mostly produce." },
-  ],
-  cooking: [
-    { text:"Oh my god — the canned tomatoes ARE peeled! Perfect {shakshuka} moment." },
-    { text:"Going to do four {eggs} but I'll save some of this {shakshuka} for tomorrow." },
-    { text:"Literally my dream night — {shakshuka} and a new episode... going to do my {book} review after!" },
-  ],
-};
+CLIPS.forEach(clip => {
+  const layer = document.getElementById(clip.layerId);
+  if (!layer) return;
 
-/* ════════════════════════════════════════
-   SVG HELPERS
-════════════════════════════════════════ */
-const svg = document.getElementById('clock-svg');
-const ns  = 'http://www.w3.org/2000/svg';
-
-function S(tag, attrs = {}) {
-  const e = document.createElementNS(ns, tag);
-  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
-  return e;
-}
-
-const OR = 132, IR = 64, LR = 96;  // outer / inner / label radius
-
-function xy(deg, r) {
-  const a = deg * Math.PI / 180;
-  return { x: r * Math.cos(a), y: r * Math.sin(a) };
-}
-
-function arc(a1, a2, ro, ri, gap = 2.2) {
-  const [s, e] = [a1 + gap, a2 - gap];
-  const p1 = xy(s,ro), p2 = xy(e,ro), p3 = xy(e,ri), p4 = xy(s,ri);
-  const lg = (e - s > 180) ? 1 : 0;
-  return `M${f(p1.x)} ${f(p1.y)} A${ro} ${ro} 0 ${lg} 1 ${f(p2.x)} ${f(p2.y)} L${f(p3.x)} ${f(p3.y)} A${ri} ${ri} 0 ${lg} 0 ${f(p4.x)} ${f(p4.y)}Z`;
-}
-
-const f = n => n.toFixed(2);
-
-/* ════════════════════════════════════════
-   BUILD CLOCK
-════════════════════════════════════════ */
-
-// Background plate
-svg.appendChild(S('circle', { cx:0,cy:0,r:OR+16,fill:'#10101c',stroke:'#1e1e30','stroke-width':'1' }));
-svg.appendChild(S('circle', { cx:0,cy:0,r:IR-4, fill:'#0a0a14' }));
-
-// Connection lines group (behind segments)
-const connG = S('g', { id:'connections' });
-svg.appendChild(connG);
-
-// Active glow rings + segments
-let activeSegId = null;
-
-SEGMENTS.forEach(seg => {
-  const mid = (seg.start + seg.end) / 2;
-
-  // Outer related-state ring
-  const ring = S('path', {
-    d: arc(seg.start, seg.end, OR + 12, OR + 4),
-    fill: 'none', stroke: seg.color,
-    'stroke-width': '5', opacity: '0',
+  layer.addEventListener('mouseenter', ev => {
+    if (clip.id !== activeId) layer.style.filter = 'brightness(1.18)';
+    showTip(`${clip.n}  ${clip.title}  ·  ${clip.depth}`, ev);
   });
-  svg.appendChild(ring);
-  seg._ring = ring;
-
-  // Accent ring (active state)
-  const accent = S('path', {
-    d: arc(seg.start, seg.end, OR + 5, OR + 1, 2.4),
-    fill: seg.color, opacity: '0',
-    filter: 'url(#seg-glow)',
-    style: 'pointer-events:none',
-  });
-  svg.appendChild(accent);
-  seg._accent = accent;
-
-  // Main segment
-  const g = S('g');
-  g.style.cursor = 'pointer';
-
-  const path = S('path', {
-    d: arc(seg.start, seg.end, OR, IR),
-    fill: seg.color, opacity: '0.45',
-  });
-  path.style.transition = 'opacity 0.2s';
-
-  // Emoji
-  const lp = xy(mid, LR);
-  const txt = S('text', {
-    x: f(lp.x), y: f(lp.y),
-    'text-anchor': 'middle', 'dominant-baseline': 'middle',
-    'font-size': '18',
-    style: 'pointer-events:none;user-select:none',
-  });
-  txt.textContent = seg.emoji;
-
-  g.appendChild(path);
-  g.appendChild(txt);
-  svg.appendChild(g);
-
-  // Hover
-  g.addEventListener('mouseenter', ev => {
-    if (seg.id !== activeSegId) path.setAttribute('opacity', '0.75');
-    showTip(`${seg.emoji}  ${seg.name}  ·  ${seg.time}`, ev);
-  });
-  g.addEventListener('mousemove', ev => moveTip(ev));
-  g.addEventListener('mouseleave', () => {
-    if (seg.id !== activeSegId) path.setAttribute('opacity', '0.45');
+  layer.addEventListener('mousemove', ev => moveTip(ev));
+  layer.addEventListener('mouseleave', () => {
+    if (clip.id !== activeId) layer.style.filter = '';
     hideTip();
   });
-  g.addEventListener('click', () => {
-    if (!isDragging) playSegment(seg);
+  layer.addEventListener('click', () => selectClip(clip.id));
+});
+
+/* ═══════════════════════════════════
+   SELECT CLIP
+═══════════════════════════════════ */
+function selectClip(id) {
+  const clip = CLIPS.find(c => c.id === id);
+  if (!clip) return;
+  activeId = id;
+
+  // Info panel
+  document.getElementById('clip-n').textContent     = clip.n;
+  document.getElementById('clip-n').style.color     = clip.color;
+  document.getElementById('clip-depth').textContent = clip.depth;
+  document.getElementById('clip-title').textContent = clip.title;
+  document.getElementById('clip-title').style.color = clip.color;
+  document.getElementById('clip-desc').textContent  = clip.desc;
+  document.getElementById('clip-role').textContent  = clip.role;
+
+  // Active indicator bar
+  const bar = document.getElementById('active-bar');
+  bar.setAttribute('y',       clip.barY);
+  bar.setAttribute('height',  clip.barH);
+  bar.setAttribute('fill',    clip.color);
+  bar.setAttribute('opacity', '0.9');
+
+  // Layer highlights
+  CLIPS.forEach(c => {
+    const l = document.getElementById(c.layerId);
+    if (l) l.style.filter = c.id === id ? 'brightness(1.22)' : '';
   });
 
-  seg._path = path;
-  seg._g    = g;
-});
-
-// Progress arc (fills as video plays) — drawn above segments
-const progressArc = S('path', {
-  fill: 'none', stroke: '#fff',
-  'stroke-width': '3', 'stroke-linecap': 'round',
-  opacity: '0', style: 'pointer-events:none',
-});
-svg.appendChild(progressArc);
-
-// Clock hand
-const handLine = S('line', {
-  x1:'0', y1:'8', x2:'0', y2:`-${IR - 10}`,
-  stroke:'#e8e8f0', 'stroke-width':'2', 'stroke-linecap':'round',
-  opacity:'0', style:'pointer-events:none; transition:opacity 0.4s',
-});
-const handPivot = S('circle', { cx:'0',cy:'0',r:'5', fill:'#e8e8f0', opacity:'0', style:'pointer-events:none; transition:opacity 0.4s' });
-const handTip   = S('circle', { cx:'0',cy:`-${IR-10}`, r:'3', fill:'#e8e8f0', opacity:'0', style:'pointer-events:none; transition:opacity 0.4s' });
-svg.appendChild(handLine);
-svg.appendChild(handPivot);
-svg.appendChild(handTip);
-
-// Center text
-const centerTime = S('text', {
-  x:'0', y:'-6', 'text-anchor':'middle', 'dominant-baseline':'middle',
-  'font-size':'12', 'font-weight':'600', fill:'#ccc',
-  style:'pointer-events:none;user-select:none;transition:opacity 0.3s', opacity:'0',
-});
-const centerName = S('text', {
-  x:'0', y:'9', 'text-anchor':'middle', 'dominant-baseline':'middle',
-  'font-size':'7', 'letter-spacing':'1.5', fill:'#444',
-  style:'pointer-events:none;user-select:none;text-transform:uppercase', opacity:'0',
-});
-svg.appendChild(centerTime);
-svg.appendChild(centerName);
-
-/* ════════════════════════════════════════
-   CLOCK HAND — rotate helper
-════════════════════════════════════════ */
-function setHandAngle(deg) {
-  const t = `rotate(${deg})`;
-  handLine.setAttribute('transform', t);
-  handTip.setAttribute('transform', t);
-}
-
-function showHand(seg) {
-  handLine.setAttribute('opacity','0.9');
-  handPivot.setAttribute('opacity','0.9');
-  handTip.setAttribute('opacity','0.9');
-  setHandAngle((seg.start + seg.end) / 2);
-}
-
-/* ════════════════════════════════════════
-   PROGRESS ARC
-════════════════════════════════════════ */
-function updateProgressArc(seg, progress) {
-  if (progress <= 0.01) { progressArc.setAttribute('opacity','0'); return; }
-  const r   = OR + 9;
-  const sA  = seg.start + 2.5;
-  const eA  = sA + Math.max(0, progress * (seg.end - seg.start - 5));
-  const p1  = xy(sA, r), p2 = xy(eA, r);
-  const lg  = (eA - sA > 180) ? 1 : 0;
-  progressArc.setAttribute('d', `M${f(p1.x)} ${f(p1.y)} A${r} ${r} 0 ${lg} 1 ${f(p2.x)} ${f(p2.y)}`);
-  progressArc.setAttribute('stroke', seg.color);
-  progressArc.setAttribute('opacity', '0.8');
-}
-
-/* ════════════════════════════════════════
-   RAF TRACKING LOOP
-════════════════════════════════════════ */
-let rafId = null;
-
-function startTracking(seg) {
-  cancelAnimationFrame(rafId);
-  const player = document.getElementById('video-player');
-
-  function tick() {
-    if (player.duration && !player.paused) {
-      const p   = player.currentTime / player.duration;
-      const deg = seg.start + p * (seg.end - seg.start);
-      setHandAngle(deg);
-      updateProgressArc(seg, p);
+  // Timeline strip
+  CLIPS.forEach(c => {
+    const s = document.getElementById(`ts-${c.id}`);
+    if (!s) return;
+    if (c.id === id) {
+      s.classList.add('active');
+      s.style.cssText = `background:${c.color}20;border-color:${c.color}77;color:${c.color}`;
+    } else {
+      s.classList.remove('active');
+      s.style.cssText = `background:'';border-color:${c.color}33;color:''`;
     }
-    rafId = requestAnimationFrame(tick);
-  }
-  rafId = requestAnimationFrame(tick);
-}
-
-function stopTracking() { cancelAnimationFrame(rafId); rafId = null; }
-
-/* ════════════════════════════════════════
-   DRAG TO SEEK
-════════════════════════════════════════ */
-let isDragging = false;
-let dragMoved  = false;
-
-function mouseAngle(e) {
-  const r  = svg.getBoundingClientRect();
-  const dx = e.clientX - (r.left + r.width  / 2);
-  const dy = e.clientY - (r.top  + r.height / 2);
-  let a    = Math.atan2(dy, dx) * 180 / Math.PI;
-  if (a < -90) a += 360;   // map (-180,-90) → (180,270)
-  return a;
-}
-
-svg.addEventListener('mousedown', () => { isDragging = true; dragMoved = false; });
-
-// mousemove and mouseup are handled in the unified hotspot section below
-
-/* ════════════════════════════════════════
-   PLAYBACK
-════════════════════════════════════════ */
-function playSegment(seg, fromDrag = false) {
-  // Reset all segment visuals
-  SEGMENTS.forEach(s => {
-    s._path.setAttribute('opacity', '0.45');
-    s._path.removeAttribute('stroke');
-    s._accent.setAttribute('opacity', '0');
   });
-  clearRelated();
-
-  // Activate segment
-  seg._path.setAttribute('opacity', '1');
-  seg._accent.setAttribute('opacity', '0.4');
-  activeSegId = seg.id;
-
-  // Activity row
-  document.getElementById('activity-dot').style.background = seg.color;
-  document.getElementById('activity-time').textContent = seg.time;
-  document.getElementById('activity-name').textContent = `${seg.emoji}  ${seg.name}`;
-
-  // Center clock text
-  centerTime.textContent = seg.time;
-  centerTime.setAttribute('opacity', '1');
-  centerName.textContent = seg.name;
-  centerName.setAttribute('opacity', '1');
-
-  // Show hand
-  showHand(seg);
 
   // Video
   const player = document.getElementById('video-player');
   document.getElementById('idle-overlay').style.display = 'none';
-  if (!fromDrag) {
-    player.src = encodeURI(seg.video);
-    player.load();
-    player.play().catch(() => {});
-  }
+  player.src = encodeURI(clip.video);
+  player.load();
+  player.play().catch(() => {});
 
-  clearAllHotspots();
-  document.getElementById('back-btn').classList.remove('visible');
-  hideEntityStrip();
-  renderTranscript(seg.id);
-  startTracking(seg);
+  // Ocean ecological state
+  applyEcoState(id);
+
+  // Keep fisherman in sync when navigation comes from layer/timeline click
+  const clipIdx = CLIPS.findIndex(c => c.id === id);
+  if (clipIdx !== -1) moveFisherToIdx(clipIdx);
+
   hideTip();
 }
 
-/* ════════════════════════════════════════
-   CONNECTION LINES
-════════════════════════════════════════ */
-function drawConnections(fromSeg, toSegs, entityKey) {
-  connG.innerHTML = '';
-  const color = ENTITIES[entityKey]?.color ?? '#fff';
-  const fromMid = (fromSeg.start + fromSeg.end) / 2;
-  const fp      = xy(fromMid, IR - 14);
+/* ═══════════════════════════════════
+   APPLY ECOLOGICAL STATE
+═══════════════════════════════════ */
+function applyEcoState(id) {
+  const e = ECO[id]; if (!e) return;
 
-  // From-dot
-  connG.appendChild(S('circle', { cx:f(fp.x), cy:f(fp.y), r:'3', fill:color, opacity:'0.9' }));
-
-  toSegs.forEach((toSeg, i) => {
-    const toMid = (toSeg.start + toSeg.end) / 2;
-    const tp    = xy(toMid, IR - 14);
-
-    // Bezier control: pulled toward center
-    const cp = { x: (fp.x + tp.x) * 0.2, y: (fp.y + tp.y) * 0.2 };
-    const d  = `M${f(fp.x)} ${f(fp.y)} Q${f(cp.x)} ${f(cp.y)} ${f(tp.x)} ${f(tp.y)}`;
-
-    const line = S('path', {
-      d, fill:'none', stroke:color,
-      'stroke-width':'1.8', 'stroke-linecap':'round',
-      opacity:'0.75', filter:'url(#line-glow)',
-    });
-    connG.appendChild(line);
-
-    // Animate stroke-dashoffset
-    const len = line.getTotalLength();
-    line.setAttribute('stroke-dasharray', len);
-    line.setAttribute('stroke-dashoffset', len);
-    setTimeout(() => {
-      line.style.transition = `stroke-dashoffset 0.55s ease ${i * 0.12}s`;
-      line.setAttribute('stroke-dashoffset', '0');
-    }, 30);
-
-    // To-dot
-    connG.appendChild(S('circle', { cx:f(tp.x), cy:f(tp.y), r:'3', fill:color, opacity:'0.9' }));
-  });
-}
-
-function clearConnections() { connG.innerHTML = ''; }
-
-/* ════════════════════════════════════════
-   RELATED HIGHLIGHTING
-════════════════════════════════════════ */
-function highlightRelated(segIds, entityKey) {
-  clearRelated();
-  if (!segIds.length) return;
-
-  const ent  = ENTITIES[entityKey];
-  const segs = segIds.map(id => SEGMENTS.find(s => s.id === id)).filter(Boolean);
-  const from = SEGMENTS.find(s => s.id === activeSegId);
-
-  segs.forEach(s => {
-    s._ring.setAttribute('opacity', '0.7');
-    s._ring.classList.add('seg-ring');
+  // Coral: all three coral groups
+  ['coral-shallow','coral-mid','coral-deep'].forEach(gid => {
+    const el = document.getElementById(gid);
+    if (el) el.style.filter = e.coralF;
   });
 
-  if (from) drawConnections(from, segs, entityKey);
+  // Fish
+  const fa = document.getElementById('fish-a');    if (fa) fa.style.opacity = e.fishA;
+  const fm = document.getElementById('fish-mid');  if (fm) fm.style.opacity = e.midF;
+  const fd = document.getElementById('fish-deep'); if (fd) fd.style.opacity = e.fishA * 0.3;
 
-  const ri = document.getElementById('related-info');
-  ri.querySelector('.ri-label').textContent = `${ent?.label ?? entityKey} also appears in:`;
-  ri.querySelector('.ri-segments').innerHTML = segs.map(s =>
-    `<span class="ri-seg" data-id="${s.id}" style="color:${s.color};border-color:${s.color}44;background:${s.color}12">${s.emoji} ${s.name}</span>`
-  ).join('');
-  ri.classList.add('visible');
-  ri.querySelectorAll('.ri-seg').forEach(b =>
-    b.addEventListener('click', () => { const s = SEGMENTS.find(x => x.id === b.dataset.id); if (s) playSegment(s); })
-  );
+  // Shockwave
+  const sw = document.getElementById('shockwave'); if (sw) sw.style.opacity = e.shockOp;
+
+  // Diver
+  const dv = document.getElementById('diver-g');   if (dv) dv.style.opacity = e.diverOp;
+
+  // Children
+  const ch = document.getElementById('children-g');if (ch) ch.style.opacity = e.childOp;
 }
 
-function clearRelated() {
-  SEGMENTS.forEach(s => { s._ring.setAttribute('opacity','0'); s._ring.classList.remove('seg-ring'); });
-  clearConnections();
-  document.getElementById('related-info').classList.remove('visible');
+/* ═══════════════════════════════════
+   FISHERMAN DRAG SYSTEM
+═══════════════════════════════════ */
+
+// SVG Y home position for each layer (where fisherman snaps to)
+const FISHER_HOMES      = [65, 155, 268, 375, 462];
+// SVG Y thresholds between layers
+const FISHER_THRESHOLDS = [92, 215, 325, 430];
+
+let fisherDrag   = false;
+let fisherIdx    = 0;   // current layer index
+let hintVisible  = true;
+
+const fisherEl   = document.getElementById('fisherman-group');
+const fishLine   = document.getElementById('fish-line-dyn');
+const fisherSurf = document.getElementById('fisher-surface');
+const fisherSub  = document.getElementById('fisher-underwater');
+const fisherHint = document.getElementById('fisher-hint');
+const fisherGlow = document.getElementById('fisher-glow-circle');
+
+/* Convert browser clientY → SVG coordinate Y */
+function clientToSVGY(clientY) {
+  const svg  = document.getElementById('ocean-svg');
+  const rect = svg.getBoundingClientRect();
+  return (clientY - rect.top) * (500 / rect.height);
 }
 
-/* ════════════════════════════════════════
-   TRANSCRIPT
-════════════════════════════════════════ */
-function renderTranscript(segId) {
-  const box   = document.getElementById('transcript');
-  const lines = TRANSCRIPTS[segId];
-  if (!lines) { box.innerHTML = '<div class="t-idle">No script available</div>'; return; }
-
-  box.innerHTML = lines.map(line => {
-    const html = line.text.replace(/\{(\w+)\}/g, (_, key) => {
-      const ent = ENTITIES[key]; if (!ent) return key;
-      return `<span class="ent-chip" data-entity="${key}" style="background:${ent.color}20;color:${ent.color};border-color:${ent.color}55">${ent.label}</span>`;
-    });
-    return `<div class="t-line">${html}</div>`;
-  }).join('');
-
-  box.querySelectorAll('.ent-chip').forEach(c =>
-    c.addEventListener('click', () => activateEntity(c.dataset.entity, c))
-  );
+/* Which layer index does this SVG Y fall in? */
+function yToIdx(svgY) {
+  for (let i = 0; i < FISHER_THRESHOLDS.length; i++) {
+    if (svgY < FISHER_THRESHOLDS[i]) return i;
+  }
+  return 4;
 }
 
-function activateEntity(key, src) {
-  if (!ENTITIES[key]) return;
-  document.querySelectorAll('.ent-chip.active-entity').forEach(c => c.classList.remove('active-entity'));
-  src?.classList.add('active-entity');
-  const related = (ENTITY_LINKS[key] ?? []).filter(id => id !== activeSegId);
-  highlightRelated(related, key);
-}
+/* Update fisherman visuals (appearance + dynamic line) without clip selection */
+function updateFisherVisuals(svgY) {
+  const below = svgY >= 90;
+  fisherSurf.style.opacity = below ? '0' : '1';
+  fisherSub.style.opacity  = below ? '1' : '0';
 
-/* ════════════════════════════════════════
-   VIDEO CLICK → entity detection
-════════════════════════════════════════ */
-document.getElementById('video-wrapper').addEventListener('click', ev => {
-  const player = document.getElementById('video-player');
-  if (!activeSegId || player.readyState < 1) return;
-  const rect = player.getBoundingClientRect();
-  if ((ev.clientY - rect.top) / rect.height > 0.88) return;
-  const slot = (CLIP_TIMELINE[activeSegId] ?? []).find(s => player.currentTime >= s.from && player.currentTime < s.to);
-  if (slot?.entities?.length) showEntityStrip(slot.entities); else hideEntityStrip();
-});
-
-function showEntityStrip(keys) {
-  const chips = document.getElementById('strip-chips');
-  chips.innerHTML = keys.map(key => {
-    const ent = ENTITIES[key]; if (!ent) return '';
-    return `<span class="ent-chip" data-entity="${key}" style="background:${ent.color}20;color:${ent.color};border-color:${ent.color}55">${ent.label}</span>`;
-  }).join('');
-  document.getElementById('entity-strip').classList.add('visible');
-  chips.querySelectorAll('.ent-chip').forEach(c =>
-    c.addEventListener('click', () => activateEntity(c.dataset.entity, c))
-  );
-}
-function hideEntityStrip() {
-  document.getElementById('entity-strip').classList.remove('visible');
-  document.getElementById('strip-chips').innerHTML = '';
-}
-
-/* ════════════════════════════════════════
-   TOOLTIP
-════════════════════════════════════════ */
-function showTip(t, ev) { const el=document.getElementById('tooltip'); el.textContent=t; el.style.display='block'; moveTip(ev); }
-function moveTip(ev)     { const el=document.getElementById('tooltip'); el.style.left=(ev.clientX+14)+'px'; el.style.top=(ev.clientY-32)+'px'; }
-function hideTip()       { document.getElementById('tooltip').style.display='none'; }
-
-/* ════════════════════════════════════════
-   HOTSPOT DATA
-   at: timestamp (s) when SVG appears
-   hideAt: timestamp (s) when it fades
-   pos: {x,y} as % of video dimensions
-   link: video file to play on drag
-════════════════════════════════════════ */
-const HOTSPOTS = {
-  cooking: [
-    {
-      id: 'hs-shakshuka',
-      at: 11, hideAt: 28,
-      pos: { x: 82, y: 14 },          // top-right corner of the video
-      hint: 'Double-click to explore',
-      link: 'https://github.com/fukexuexue/interactive-video-vlog/releases/download/v1/cook.mp4',
-      linkLabel: 'Full Shakshuka Recipe',
-      // SVG split into independently animatable parts (data-part)
-      svg: `
-        <g class="hs-part" data-part="base">
-          <ellipse cx="44" cy="62" rx="37" ry="13" fill="#3d1a08"/>
-          <ellipse cx="44" cy="58" rx="33" ry="12" fill="#c0392b"/>
-          <ellipse cx="38" cy="56" rx="10" ry="7"  fill="#e74c3c" opacity="0.55"/>
-          <ellipse cx="54" cy="57" rx="8"  ry="6"  fill="#e74c3c" opacity="0.45"/>
-        </g>
-        <g class="hs-part" data-part="egg1">
-          <ellipse cx="30" cy="53" rx="11" ry="10" fill="rgba(255,255,255,0.93)"/>
-          <circle  cx="30" cy="53" r="5.5" fill="#f9c74f"/>
-          <circle  cx="28" cy="51" r="1.8" fill="#fff" opacity="0.5"/>
-        </g>
-        <g class="hs-part" data-part="egg2">
-          <ellipse cx="56" cy="53" rx="11" ry="10" fill="rgba(255,255,255,0.93)"/>
-          <circle  cx="56" cy="53" r="5.5" fill="#f9c74f"/>
-          <circle  cx="54" cy="51" r="1.8" fill="#fff" opacity="0.5"/>
-        </g>
-        <g class="hs-part" data-part="herbs">
-          <ellipse cx="43" cy="48" rx="5" ry="2.5" fill="rgba(255,255,255,0.8)"/>
-          <circle  cx="40" cy="45" r="2.2" fill="#2a9d5c"/>
-          <circle  cx="45" cy="44" r="1.7" fill="#2a9d5c"/>
-          <circle  cx="37" cy="46" r="1.5" fill="#2a9d5c" opacity="0.75"/>
-        </g>
-        <g class="hs-part" data-part="steam">
-          <path d="M20 38 C18 32 22 27 20 20" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <path d="M44 32 C42 26 46 21 44 14" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <path d="M66 38 C64 32 68 27 66 20" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </g>
-        <g class="hs-part" data-part="handle">
-          <rect x="77" y="55" width="13" height="6" rx="3" fill="#3d1a08"/>
-        </g>
-      `
-    }
-  ]
-};
-
-/* ════════════════════════════════════════
-   HOTSPOT STATE
-════════════════════════════════════════ */
-const activeHotspots  = new Map(); // id → DOM element
-const visibleHotspots = new Set();
-let   prevSegForBack  = null;      // segment to return to after extended video
-
-/* ════════════════════════════════════════
-   HOTSPOT: CHECK ON TIMEUPDATE
-════════════════════════════════════════ */
-document.getElementById('video-player').addEventListener('timeupdate', () => {
-  if (!activeSegId) return;
-  const t = document.getElementById('video-player').currentTime;
-  (HOTSPOTS[activeSegId] ?? []).forEach(spot => {
-    const inRange = t >= spot.at && t < (spot.hideAt ?? Infinity);
-    if (inRange && !visibleHotspots.has(spot.id))  showHotspot(spot);
-    if (!inRange && visibleHotspots.has(spot.id))  removeHotspot(spot.id);
-  });
-});
-
-/* ════════════════════════════════════════
-   HOTSPOT: SHOW / REMOVE
-════════════════════════════════════════ */
-function showHotspot(spot) {
-  visibleHotspots.add(spot.id);
-
-  const el = document.createElement('div');
-  el.className = 'hotspot';
-  el.id = spot.id;
-  el.style.cssText = `left:${spot.pos.x}%;top:${spot.pos.y}%;opacity:0`;
-  el.innerHTML = `
-    <svg class="hotspot-icon" width="88" height="78" viewBox="0 0 88 78">${spot.svg}</svg>
-    <div class="hotspot-badge">🍳 ${spot.hint}</div>
-  `;
-
-  document.getElementById('hotspot-layer').appendChild(el);
-  activeHotspots.set(spot.id, el);
-
-  // Fade in
-  requestAnimationFrame(() => {
-    el.style.transition = 'opacity 0.55s';
-    el.style.opacity = '1';
-  });
-
-  // Single click → bounce feedback (shows it's interactive)
-  el.addEventListener('click', ev => {
-    ev.stopPropagation();
-    el.classList.remove('bounce');
-    void el.offsetWidth; // reflow to restart animation
-    el.classList.add('bounce');
-    setTimeout(() => el.classList.remove('bounce'), 380);
-  });
-
-  // Double-click → decompose + navigate
-  el.addEventListener('dblclick', ev => {
-    ev.stopPropagation();
-    ev.preventDefault();
-    decomposeHotspot(el, spot);
-  });
-}
-
-function removeHotspot(id) {
-  visibleHotspots.delete(id);
-  const el = activeHotspots.get(id);
-  if (!el) return;
-  el.style.transition = 'opacity 0.4s';
-  el.style.opacity = '0';
-  setTimeout(() => el.remove(), 420);
-  activeHotspots.delete(id);
-}
-
-function clearAllHotspots() {
-  [...activeHotspots.keys()].forEach(removeHotspot);
-  visibleHotspots.clear();
-}
-
-/* ════════════════════════════════════════
-   DECOMPOSE: parts fly apart on dblclick
-════════════════════════════════════════ */
-function decomposeHotspot(el, spot) {
-  el.style.pointerEvents = 'none';
-
-  // Each part's explosion direction (SVG px units, relative to part center)
-  const dirs = {
-    steam:  { tx:  0,  ty: -65, r:  0,  s: 0.05, d: 0.00 },
-    herbs:  { tx:  5,  ty: -48, r: 10,  s: 0.10, d: 0.05 },
-    egg1:   { tx: -52, ty: -38, r:-28,  s: 0.12, d: 0.08 },
-    egg2:   { tx:  52, ty: -38, r: 28,  s: 0.12, d: 0.08 },
-    handle: { tx:  58, ty:  12, r: 42,  s: 0.20, d: 0.12 },
-    base:   { tx:  0,  ty:  46, r: 12,  s: 0.40, d: 0.04 },
-  };
-
-  el.querySelectorAll('.hs-part').forEach(part => {
-    const key = part.dataset.part;
-    const d   = dirs[key] ?? { tx: 0, ty: -40, r: 0, s: 0.2, d: 0 };
-
-    part.style.transition =
-      `transform 0.58s cubic-bezier(.4,0,.6,1) ${d.d}s,` +
-      `opacity   0.50s ease                    ${d.d}s`;
-
-    requestAnimationFrame(() => {
-      part.style.transform = `translate(${d.tx}px,${d.ty}px) rotate(${d.r}deg) scale(${d.s})`;
-      part.style.opacity   = '0';
-    });
-  });
-
-  // Fade badge quickly
-  el.querySelector('.hotspot-badge').style.opacity = '0';
-
-  // Trigger video after animation
-  setTimeout(() => triggerHotspotLink(spot, el), 680);
-}
-
-/* Clock drag — mousemove / mouseup */
-document.addEventListener('mousemove', ev => {
-  if (!isDragging) return;
-  const a   = mouseAngle(ev);
-  const seg = SEGMENTS.find(s => a >= s.start && a < s.end);
-  if (!seg) return;
-  dragMoved = true;
-  setHandAngle(a);
-  if (seg.id !== activeSegId) {
-    playSegment(seg, true);
+  if (below) {
+    // Curve the fishing line slightly with depth
+    const slack = Math.min((svgY - 90) * 0.11, 18);
+    fishLine.setAttribute('d',
+      `M155 ${svgY - 14} Q${155 + slack} ${(svgY + 88) / 2} 155 89`);
+    fishLine.style.opacity = String(Math.min(0.55, (svgY - 90) / 40));
   } else {
-    const player = document.getElementById('video-player');
-    if (player.duration) {
-      const p = (a - seg.start) / (seg.end - seg.start);
-      player.currentTime = Math.max(0, Math.min(player.duration, p * player.duration));
+    fishLine.style.opacity = '0';
+  }
+
+  // Glow matches current layer's color
+  const idx = yToIdx(svgY);
+  if (fisherGlow) fisherGlow.setAttribute('fill', CLIPS[idx].color);
+}
+
+/* Move fisherman during drag — detects layer crossings */
+function dragFisher(clientY) {
+  let svgY = Math.max(12, Math.min(490, clientToSVGY(clientY)));
+
+  fisherEl.setAttribute('transform', `translate(155, ${svgY})`);
+  updateFisherVisuals(svgY);
+
+  const newIdx = yToIdx(svgY);
+  if (newIdx !== fisherIdx) {
+    fisherIdx = newIdx;
+
+    // Flash the layer being entered
+    const layerEl = document.getElementById(CLIPS[newIdx].layerId);
+    if (layerEl) {
+      layerEl.style.filter = 'brightness(1.7)';
+      setTimeout(() => {
+        layerEl.style.filter = activeId === CLIPS[newIdx].id ? 'brightness(1.22)' : '';
+      }, 240);
     }
-    updateProgressArc(seg, player.currentTime / (player.duration || 1));
+
+    // Trigger clip — set flag so selectClip won't re-move fisherman
+    fisherDrag = false;         // temporarily, so selectClip's guard works
+    selectClip(CLIPS[newIdx].id);
+    fisherDrag = true;          // restore
+  }
+}
+
+/* Snap fisherman to a layer's home Y with spring animation */
+function snapFisherToLayer(idx) {
+  const homeY = FISHER_HOMES[idx];
+  fisherEl.style.transition = 'transform 0.55s cubic-bezier(.34,1.56,.64,1)';
+  fisherEl.setAttribute('transform', `translate(155, ${homeY})`);
+  setTimeout(() => {
+    fisherEl.style.transition = '';
+    updateFisherVisuals(homeY);
+  }, 580);
+}
+
+/* Called from selectClip to keep fisherman in sync with layer clicks */
+function moveFisherToIdx(idx) {
+  if (fisherDrag) return;       // don't interrupt a drag
+  fisherIdx = idx;
+  snapFisherToLayer(idx);
+}
+
+/* ── Mouse events ── */
+fisherEl.addEventListener('mousedown', ev => {
+  ev.preventDefault();
+  ev.stopPropagation();         // don't trigger SVG layer click
+  fisherDrag = true;
+  fisherEl.classList.add('dragging');
+  // Hide the hint text permanently after first touch
+  if (hintVisible) { fisherHint.style.opacity = '0'; hintVisible = false; }
+});
+
+document.addEventListener('mousemove', ev => {
+  if (!fisherDrag) return;
+  dragFisher(ev.clientY);
+});
+
+document.addEventListener('mouseup', () => {
+  if (!fisherDrag) return;
+  fisherDrag = false;
+  fisherEl.classList.remove('dragging');
+  snapFisherToLayer(fisherIdx);
+});
+
+/* ═══════════════════════════════════
+   DYNAMITE THROW SYSTEM
+═══════════════════════════════════ */
+
+const DYN_START   = { x: 234, y: 68 };  // home position in SVG coords
+const dynEl       = document.getElementById('dynamite-group');
+const throwArcEl  = document.getElementById('throw-arc');
+const expRingsEl  = document.getElementById('explosion-rings');
+const expR1       = document.getElementById('exp-r1');
+const expR2       = document.getElementById('exp-r2');
+const expR3       = document.getElementById('exp-r3');
+const dynGlow     = document.getElementById('dyn-glow');
+const dynHint     = document.getElementById('dyn-hint');
+
+let dynDragging   = false;
+let dynCurrent    = { ...DYN_START };
+
+/* Convert browser coords → SVG coords (both X and Y) */
+function clientToSVGCoords(cx, cy) {
+  const svg = document.getElementById('ocean-svg');
+  const r   = svg.getBoundingClientRect();
+  return {
+    x: (cx - r.left) * (310 / r.width),
+    y: (cy - r.top)  * (500 / r.height),
+  };
+}
+
+/* Draw the parabolic aim arc */
+function updateAimArc(tx, ty) {
+  const sx   = DYN_START.x, sy = DYN_START.y;
+  const mx   = (sx + tx) / 2;
+  const rise = Math.abs(tx - sx) * 0.55 + 20;
+  const peakY = Math.min(sy, ty) - rise;
+  throwArcEl.setAttribute('d', `M${sx} ${sy} Q${mx} ${peakY} ${tx} ${ty}`);
+  throwArcEl.style.opacity = '1';
+}
+
+/* Animate dynamite along a bezier arc then explode */
+function launchDynamite(toX, toY) {
+  throwArcEl.style.opacity = '0';
+  const sx = DYN_START.x, sy = DYN_START.y;
+  const mx = (sx + toX) / 2;
+  const rise = Math.abs(toX - sx) * 0.55 + 20;
+  const peakY = Math.min(sy, toY) - rise;
+
+  const dur   = 650;
+  const t0    = Date.now();
+
+  function step() {
+    const t  = Math.min(1, (Date.now() - t0) / dur);
+    const u  = 1 - t;
+    // Quadratic bezier
+    const x  = u * u * sx + 2 * u * t * mx + t * t * toX;
+    const y  = u * u * sy + 2 * u * t * peakY + t * t * toY;
+    const deg = t * 600;   // spin
+
+    dynEl.setAttribute('transform', `translate(${x}, ${y}) rotate(${deg})`);
+
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      onDynamiteLand(toX, toY);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+/* Handle landing */
+function onDynamiteLand(x, y) {
+  // Hide dynamite briefly
+  dynEl.style.opacity = '0';
+
+  // Animate explosion rings
+  expRingsEl.setAttribute('transform', `translate(${x}, ${y})`);
+  expRingsEl.style.opacity = '1';
+
+  const t0 = Date.now();
+  const big = y > 325;  // deeper = bigger boom
+  const maxR = big ? 120 : 70;
+
+  function animExp() {
+    const t = Math.min(1, (Date.now() - t0) / 750);
+    expR1.setAttribute('r', String(6  + t * maxR * 0.70));
+    expR2.setAttribute('r', String(6  + t * maxR * 0.90));
+    expR3.setAttribute('r', String(6  + t * maxR * 1.00));
+    expR1.style.opacity = String(0.9 * (1 - t));
+    expR2.style.opacity = String(0.6 * (1 - t));
+    expR3.style.opacity = String(0.35 * (1 - t));
+    if (t < 1) { requestAnimationFrame(animExp); }
+    else        { expRingsEl.style.opacity = '0'; }
+  }
+  requestAnimationFrame(animExp);
+
+  // Activate the SVG shockwave already in the deep layer
+  const sw = document.getElementById('shockwave');
+  if (sw) {
+    sw.style.transition = 'opacity 0.1s';
+    sw.style.opacity    = '0.95';
+    setTimeout(() => { sw.style.transition = 'opacity 1.5s'; sw.style.opacity = '0.7'; }, 200);
+  }
+
+  // Flash the whole SVG orange-white
+  const flash = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  flash.setAttribute('x', '0'); flash.setAttribute('y', '0');
+  flash.setAttribute('width', '310'); flash.setAttribute('height', '500');
+  flash.setAttribute('fill', big ? 'rgba(255,160,40,0.30)' : 'rgba(255,160,40,0.18)');
+  flash.style.pointerEvents = 'none';
+  document.getElementById('ocean-svg').appendChild(flash);
+  setTimeout(() => {
+    flash.style.transition = 'opacity 0.5s';
+    flash.style.opacity    = '0';
+    setTimeout(() => flash.remove(), 520);
+  }, 60);
+
+  // Play the destructive clip after brief delay
+  setTimeout(() => selectClip('destructive'), 380);
+
+  // Regenerate dynamite back to start after a moment
+  setTimeout(() => {
+    dynEl.style.transition = 'transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.4s';
+    dynEl.setAttribute('transform', `translate(${DYN_START.x}, ${DYN_START.y})`);
+    dynEl.style.opacity    = '1';
+    dynCurrent = { ...DYN_START };
+    setTimeout(() => dynEl.style.transition = '', 560);
+    dynGlow.setAttribute('opacity', '0.06');
+  }, 1600);
+}
+
+/* Reset dynamite (if not thrown into water) */
+function resetDynamite() {
+  dynEl.style.transition = 'transform 0.45s cubic-bezier(.34,1.56,.64,1)';
+  dynEl.setAttribute('transform', `translate(${DYN_START.x}, ${DYN_START.y})`);
+  dynCurrent = { ...DYN_START };
+  setTimeout(() => dynEl.style.transition = '', 500);
+  dynGlow.setAttribute('opacity', '0.06');
+}
+
+/* ── Mouse events ── */
+dynEl.addEventListener('mousedown', ev => {
+  ev.preventDefault();
+  ev.stopPropagation();
+  dynDragging = true;
+  dynEl.classList.add('dy-drag');
+  if (dynHint) dynHint.style.opacity = '0';
+  dynGlow.setAttribute('opacity', '0.20');
+});
+
+document.addEventListener('mousemove', ev => {
+  if (!dynDragging) return;
+  const c = clientToSVGCoords(ev.clientX, ev.clientY);
+  dynCurrent = c;
+  // Move dynamite with cursor (small tilt by horizontal offset)
+  const tilt = (c.x - DYN_START.x) * 0.3;
+  dynEl.setAttribute('transform', `translate(${c.x}, ${c.y}) rotate(${tilt})`);
+  // Show aim arc
+  updateAimArc(c.x, c.y);
+});
+
+document.addEventListener('mouseup', ev => {
+  if (!dynDragging) return;
+  dynDragging = false;
+  dynEl.classList.remove('dy-drag');
+  throwArcEl.style.opacity = '0';
+
+  const c = clientToSVGCoords(ev.clientX, ev.clientY);
+
+  if (c.y > 95) {
+    // Thrown into water — launch animation
+    launchDynamite(c.x, c.y);
+  } else {
+    // Dropped above water — reset
+    resetDynamite();
   }
 });
 
-document.addEventListener('mouseup', () => { isDragging = false; });
-
-/* ════════════════════════════════════════
-   HOTSPOT: TRIGGER LINKED VIDEO
-════════════════════════════════════════ */
-function triggerHotspotLink(spot, el) {
-  prevSegForBack = activeSegId; // remember where to go back
-
-  // Flash overlay
-  const flash = document.getElementById('connect-flash');
-  flash.querySelector('.flash-label').textContent = '↗  Extended content loading…';
-  flash.classList.add('show');
-
-  // Fade out hotspot
-  el.style.transition = 'opacity 0.3s, transform 0.3s';
-  el.style.opacity = '0';
-  el.style.transform = 'translate(-50%,-50%) scale(0.5)';
-
-  setTimeout(() => {
-    flash.classList.remove('show');
-
-    // Load extended video
-    const player = document.getElementById('video-player');
-    player.src = encodeURI(spot.link);
-    player.load();
-    player.play().catch(() => {});
-
-    // Update info bar
-    document.getElementById('activity-time').textContent = 'Extended Content';
-    document.getElementById('activity-name').textContent = `🍳  ${spot.linkLabel}`;
-    document.getElementById('activity-dot').style.background = '#f3722c';
-
-    // Show back button
-    const btn = document.getElementById('back-btn');
-    btn.classList.add('visible');
-    btn.onclick = () => {
-      const seg = SEGMENTS.find(s => s.id === prevSegForBack);
-      if (seg) playSegment(seg);
-      btn.classList.remove('visible');
-    };
-
-    el.remove();
-    activeHotspots.delete(spot.id);
-    visibleHotspots.delete(spot.id);
-  }, 520);
+/* ═══════════════════════════════════
+   TOOLTIP
+═══════════════════════════════════ */
+function showTip(t, ev) {
+  const el = document.getElementById('tooltip');
+  el.textContent = t; el.style.display = 'block'; moveTip(ev);
 }
+function moveTip(ev) {
+  const el = document.getElementById('tooltip');
+  el.style.left = (ev.clientX + 14) + 'px';
+  el.style.top  = (ev.clientY - 30) + 'px';
+}
+function hideTip() { document.getElementById('tooltip').style.display = 'none'; }
 </script>
 </body>
 </html>
