@@ -363,7 +363,7 @@
     </div>
 
     <div class="video-wrapper" id="video-wrapper">
-      <video id="video-player" controls></video>
+      <video id="video-player" controls playsinline webkit-playsinline preload="metadata"></video>
       <div id="idle-overlay">← Drag or click the clock to begin</div>
       <div id="video-click-hint">🔍 Click to detect elements</div>
       <!-- Hotspot layer: SVG overlays appear here at keyframes -->
@@ -393,6 +393,14 @@
 <div id="tooltip"></div>
 
 <script>
+/* Force browsers to treat the response as video/mp4 regardless of what the
+   server (GitHub Release / Azure blob) declares. Fixes iOS Safari refusal
+   to play application/octet-stream and improves cross-browser reliability. */
+function setVideoSrc(playerEl, url) {
+  playerEl.innerHTML = `<source src="${url}" type="video/mp4">`;
+  playerEl.load();
+}
+
 /* ════════════════════════════════════════
    DATA
 ════════════════════════════════════════ */
@@ -737,8 +745,7 @@ function playSegment(seg, fromDrag = false) {
   const player = document.getElementById('video-player');
   document.getElementById('idle-overlay').style.display = 'none';
   if (!fromDrag) {
-    player.src = encodeURI(seg.video);
-    player.load();
+    setVideoSrc(player, encodeURI(seg.video));
     player.play().catch(() => {});
   }
 
@@ -1101,8 +1108,7 @@ function triggerHotspotLink(spot, el) {
 
     // Load extended video
     const player = document.getElementById('video-player');
-    player.src = encodeURI(spot.link);
-    player.load();
+    setVideoSrc(player, encodeURI(spot.link));
     player.play().catch(() => {});
 
     // Update info bar
