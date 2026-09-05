@@ -65,9 +65,7 @@
     }
     body.show-hints #clock-svg,
     body.show-hints .hotspot { animation: hint-pulse-strong 1.4s ease-in-out infinite; }
-    body.show-hints .ent-chip,
-    body.show-hints #video-wrapper { animation: hint-outline-strong 1.4s ease-in-out infinite; border-radius: 8px; }
-    body.show-hints #video-click-hint { opacity: 1 !important; background: rgba(249,199,79,0.95); color: #1a1a24; font-weight: 700; }
+    body.show-hints .ent-chip { animation: hint-outline-strong 1.4s ease-in-out infinite; border-radius: 8px; }
 
     /* ── Always-visible "interactive here" indicator pills ── */
     .click-ping {
@@ -368,7 +366,6 @@
       <video id="video-player" controls></video>
       <div id="idle-overlay">← Drag or click the clock to begin</div>
       <div id="video-click-hint">🔍 Click to detect elements</div>
-      <div class="click-ping ping-video">🖱 click frame</div>
       <!-- Hotspot layer: SVG overlays appear here at keyframes -->
       <div id="hotspot-layer"></div>
       <!-- Flash when hotspot triggers navigation -->
